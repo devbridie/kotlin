@@ -6,7 +6,7 @@ fun foo(v: Int): Int {
         inlineCall { foo(1) }
     }
 
-    return 2
+    return 2 // This line should be visited once in normal step over
 }
 
 
@@ -17,3 +17,5 @@ fun main(args: Array<String>) {
 inline fun inlineCall(l: () -> Unit) {
     l()
 }
+
+// STEP_OVER: 3
