@@ -133,6 +133,12 @@ public class KotlinEvaluateExpressionTestGenerated extends AbstractKotlinEvaluat
             doSingleBreakpointTest(fileName);
         }
 
+        @TestMetadata("extensionFunctionInObject.kt")
+        public void testExtensionFunctionInObject() throws Exception {
+            String fileName = KotlinTestUtils.navigationMetadata("idea/testData/debugger/tinyApp/src/evaluate/singleBreakpoint/extensionFunctionInObject.kt");
+            doSingleBreakpointTest(fileName);
+        }
+
         @TestMetadata("extractLocalVariables.kt")
         public void testExtractLocalVariables() throws Exception {
             String fileName = KotlinTestUtils.navigationMetadata("idea/testData/debugger/tinyApp/src/evaluate/singleBreakpoint/extractLocalVariables.kt");
