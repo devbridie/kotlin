@@ -3649,6 +3649,12 @@ public class JavaToKotlinConverterForWebDemoTestGenerated extends AbstractJavaTo
             doTest(fileName);
         }
 
+        @TestMetadata("NullableAnnotationAndBadAccess.java")
+        public void testNullableAnnotationAndBadAccess() throws Exception {
+            String fileName = KotlinTestUtils.navigationMetadata("j2k/testData/fileOrElement/nullability/NullableAnnotationAndBadAccess.java");
+            doTest(fileName);
+        }
+
         @TestMetadata("nullableField.java")
         public void testNullableField() throws Exception {
             String fileName = KotlinTestUtils.navigationMetadata("j2k/testData/fileOrElement/nullability/nullableField.java");
