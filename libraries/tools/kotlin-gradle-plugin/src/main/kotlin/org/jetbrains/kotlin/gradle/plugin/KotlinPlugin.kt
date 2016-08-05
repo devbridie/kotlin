@@ -61,11 +61,10 @@ abstract class KotlinSourceSetProcessor<T : AbstractCompile>(
     protected val absoluteSourceRootDir: String = project.projectDir.path + "/" + sourceRootDir
     protected val kotlinSourceSet: KotlinSourceSet = createKotlinSourceSet()
     protected val kotlinTask: T = createKotlinCompileTask()
-    protected val kotlinTaskName: String by lazy { kotlinTask.name }
     protected abstract val defaultKotlinDestinationDir: File
 
     fun run() {
-        commonTaskConfiguration()
+        addKotlinDirSetToSources()
         doTargetSpecificProcessing()
     }
 
@@ -77,6 +76,13 @@ abstract class KotlinSourceSetProcessor<T : AbstractCompile>(
         return kotlinSourceSet
     }
 
+    private fun addKotlinDirSetToSources() {
+        val kotlinDirSet = kotlinSourceSet.kotlin
+        sourceSet.allJava.source(kotlinDirSet)
+        sourceSet.allSource.source(kotlinDirSet)
+        sourceSet.resources.filter.exclude { it.file in kotlinDirSet }
+    }
+
     private fun createKotlinCompileTask(): T {
         val name = sourceSet.getCompileTaskName(compileTaskNameSuffix)
         logger.kotlinDebug("Creating kotlin compile task $name")
@@ -86,20 +92,6 @@ abstract class KotlinSourceSetProcessor<T : AbstractCompile>(
         kotlinCompile.mapClasspath { sourceSet.compileClasspath }
         kotlinCompile.destinationDir = defaultKotlinDestinationDir
         return kotlinCompile
-    }
-
-    private fun commonTaskConfiguration() {
-        javaBasePlugin.configureForSourceSet(sourceSet, kotlinTask)
-        kotlinTask.description = taskDescription
-        mapKotlinTaskProperties(project, kotlinTask)
-
-        val kotlinDirSet = kotlinSourceSet.kotlin
-        sourceSet.allJava.source(kotlinDirSet)
-        sourceSet.allSource.source(kotlinDirSet)
-        sourceSet.resources.filter.exclude { it.file in kotlinDirSet }
-        kotlinDirSet.srcDirs(sourceSet.java.srcDirs)
-
-        kotlinTask.source(kotlinDirSet)
     }
 
     protected abstract fun doCreateTask(project: Project, taskName: String): T
@@ -206,10 +198,10 @@ class Kotlin2JsSourceSetProcessor(
             tasksProvider.createKotlinJSTask(project, taskName)
 
     override fun doTargetSpecificProcessing() {
-        build?.dependsOn(kotlinTaskName)
-        clean?.dependsOn("clean" + kotlinTaskName.capitalize())
-        kotlinTask.source(kotlinDirSet)
-
+        val taskName = kotlinTask.name
+        build?.dependsOn(taskName)
+        clean?.dependsOn("clean" + taskName.capitalize())
+        kotlinTask.source(kotlinSourceSet.kotlin)
         createCleanSourceMapTask()
     }
 
