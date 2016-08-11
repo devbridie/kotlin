@@ -16,12 +16,13 @@
 
 package org.jetbrains.kotlin.idea.search.usagesSearch
 
-import com.intellij.psi.PsiConstructorCall
-import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiMethod
-import com.intellij.psi.PsiReference
+import com.intellij.openapi.util.Pair
+import com.intellij.psi.*
 import com.intellij.psi.search.SearchScope
+import com.intellij.psi.search.searches.AllOverridingMethodsSearch
 import com.intellij.psi.util.MethodSignatureUtil
+import com.intellij.util.Processor
+import org.jetbrains.kotlin.asJava.LightClassUtil
 import org.jetbrains.kotlin.asJava.elements.KtLightElement
 import org.jetbrains.kotlin.asJava.elements.KtLightMethod
 import org.jetbrains.kotlin.asJava.toLightMethods
@@ -35,6 +36,7 @@ import org.jetbrains.kotlin.idea.search.declarationsSearch.searchInheritors
 import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.psi.psiUtil.contains
 import org.jetbrains.kotlin.psi.psiUtil.getNonStrictParentOfType
+import org.jetbrains.kotlin.psi.psiUtil.isOverridable
 import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.DescriptorToSourceUtils
 import org.jetbrains.kotlin.resolve.DescriptorUtils
@@ -210,6 +212,25 @@ fun PsiReference.isUsageInContainingDeclaration(declaration: KtNamedDeclaration)
     }
 }
 
+private fun PsiMethod.checkOverrider(subMethod: PsiMethod): Boolean {
+    var result = false
+    AllOverridingMethodsSearch.search(containingClass).forEach(Processor<Pair<PsiMethod, PsiMethod>> {
+        pair ->
+
+        val superMethod = pair.first
+        if (superMethod == this) {
+            val overrider = pair.second
+            if (overrider == subMethod) {
+                result = true
+            }
+        }
+
+        !result
+    })
+
+    return result
+}
+
 fun PsiReference.isCallableOverrideUsage(declaration: KtNamedDeclaration): Boolean {
     val toDescriptor: (KtDeclaration) -> CallableDescriptor? = { declaration ->
         if (declaration is KtParameter) {
@@ -231,6 +252,27 @@ fun PsiReference.isCallableOverrideUsage(declaration: KtNamedDeclaration): Boole
             }
             is PsiMethod -> {
                 declaration.toLightMethods().any { superMethod -> MethodSignatureUtil.isSuperMethod(superMethod, it) }
+            }
+            else -> false
+        }
+    }
+}
+
+fun PsiReference.isImplementationUsage(declaration: KtNamedDeclaration): Boolean {
+    if (declaration !is KtNamedFunction) return false
+    if (!declaration.hasBody()) return false
+    val subMethod = LightClassUtil.getLightClassMethod(declaration) ?: return false
+    return unwrappedTargets.any {
+        when (it) {
+            is KtDeclaration -> {
+                if (it is KtNamedFunction && it.isOverridable()) {
+                    val method = LightClassUtil.getLightClassMethod(it) ?: return false
+                    method.checkOverrider(subMethod)
+                }
+                else false
+            }
+            is PsiMethod -> {
+                it.checkOverrider(subMethod)
             }
             else -> false
         }

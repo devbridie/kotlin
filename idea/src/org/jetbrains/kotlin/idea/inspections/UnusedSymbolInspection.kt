@@ -49,6 +49,8 @@ import org.jetbrains.kotlin.idea.findUsages.KotlinFindUsagesHandlerFactory
 import org.jetbrains.kotlin.idea.findUsages.handlers.KotlinFindClassUsagesHandler
 import org.jetbrains.kotlin.idea.imports.importableFqName
 import org.jetbrains.kotlin.idea.references.mainReference
+import org.jetbrains.kotlin.idea.search.ideaExtensions.KotlinReferencesSearchOptions
+import org.jetbrains.kotlin.idea.search.ideaExtensions.KotlinReferencesSearchParameters
 import org.jetbrains.kotlin.idea.search.usagesSearch.*
 import org.jetbrains.kotlin.idea.util.ProjectRootsUtil
 import org.jetbrains.kotlin.lexer.KtTokens
@@ -154,7 +156,7 @@ class UnusedSymbolInspection : AbstractKotlinInspection() {
                 if (declaration is KtNamedFunction && isConventionalName(declaration)) return
 
                 // More expensive, resolve-based checks
-                if (declaration.resolveToDescriptorIfAny() == null) return
+                declaration.resolveToDescriptorIfAny() ?: return
                 if (isEntryPoint(declaration)) return
                 if (declaration is KtProperty && declaration.isSerializationImplicitlyUsedField()) return
                 if (declaration is KtNamedFunction && declaration.isSerializationImplicitlyUsedMethod()) return
@@ -237,7 +239,10 @@ class UnusedSymbolInspection : AbstractKotlinInspection() {
     }
 
     private fun hasReferences(declaration: KtNamedDeclaration, useScope: SearchScope): Boolean {
-        return !ReferencesSearch.search(declaration, useScope).forEach(fun (ref: PsiReference): Boolean {
+        val options = KotlinReferencesSearchOptions(acceptImplementations = true)
+        val parameters = KotlinReferencesSearchParameters(declaration, useScope, false, null, options)
+
+        return !ReferencesSearch.search(parameters).forEach(fun (ref: PsiReference): Boolean {
             if (declaration.isAncestor(ref.element)) return true // usages inside element's declaration are not counted
 
             if (ref.element.parent is KtValueArgumentName) return true // usage of parameter in form of named argument is not counted

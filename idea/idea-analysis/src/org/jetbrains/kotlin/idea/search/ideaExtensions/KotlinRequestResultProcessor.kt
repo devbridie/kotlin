@@ -25,6 +25,7 @@ import com.intellij.psi.search.RequestResultProcessor
 import com.intellij.util.Processor
 import org.jetbrains.kotlin.idea.search.usagesSearch.isCallableOverrideUsage
 import org.jetbrains.kotlin.idea.search.usagesSearch.isExtensionOfDeclarationClassUsage
+import org.jetbrains.kotlin.idea.search.usagesSearch.isImplementationUsage
 import org.jetbrains.kotlin.idea.search.usagesSearch.isUsageInContainingDeclaration
 import org.jetbrains.kotlin.psi.KtNamedDeclaration
 
@@ -61,6 +62,9 @@ class KotlinRequestResultProcessor(
                 return true
             }
             if (options.acceptExtensionsOfDeclarationClass && isExtensionOfDeclarationClassUsage(originalElement)) {
+                return true
+            }
+            if (options.acceptImplementations && isImplementationUsage(originalElement)) {
                 return true
             }
         }

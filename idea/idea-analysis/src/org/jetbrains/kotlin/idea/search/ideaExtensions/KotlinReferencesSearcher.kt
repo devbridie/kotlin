@@ -49,7 +49,8 @@ import org.jetbrains.kotlin.psi.psiUtil.parents
 data class KotlinReferencesSearchOptions(val acceptCallableOverrides: Boolean = false,
                                          val acceptOverloads: Boolean = false,
                                          val acceptExtensionsOfDeclarationClass: Boolean = false,
-                                         val acceptCompanionObjectMembers: Boolean = false) {
+                                         val acceptCompanionObjectMembers: Boolean = false,
+                                         val acceptImplementations: Boolean = false) {
     fun anyEnabled(): Boolean = acceptCallableOverrides || acceptOverloads || acceptExtensionsOfDeclarationClass
 
     companion object {
