@@ -1537,6 +1537,18 @@ public class QuickFixMultiFileTestGenerated extends AbstractQuickFixMultiFileTes
             KotlinTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("idea/testData/quickfix/removeUnused"), Pattern.compile("^(\\w+)\\.((before\\.Main\\.\\w+)|(test))$"), true);
         }
 
+        @TestMetadata("javaTriangle.before.Main.kt")
+        public void testJavaTriangle() throws Exception {
+            String fileName = KotlinTestUtils.navigationMetadata("idea/testData/quickfix/removeUnused/javaTriangle.before.Main.kt");
+            doTestWithExtraFile(fileName);
+        }
+
+        @TestMetadata("javaTriangle2.before.Main.kt")
+        public void testJavaTriangle2() throws Exception {
+            String fileName = KotlinTestUtils.navigationMetadata("idea/testData/quickfix/removeUnused/javaTriangle2.before.Main.kt");
+            doTestWithExtraFile(fileName);
+        }
+
         @TestMetadata("usedObjectAsAliasMulti.before.Main.kt")
         public void testUsedObjectAsAliasMulti() throws Exception {
             String fileName = KotlinTestUtils.navigationMetadata("idea/testData/quickfix/removeUnused/usedObjectAsAliasMulti.before.Main.kt");
