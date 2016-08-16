@@ -171,6 +171,7 @@ These artifacts include extensions for the types available in the latter JDKs, s
 - [`KT-12997`](https://youtrack.jetbrains.com/issue/KT-12997) Override/Implement Members: Support "Copy JavaDoc" options for library classes
 - [`KT-13207`](https://youtrack.jetbrains.com/issue/KT-13207) Exception on safe delete from intention in 2016.2
 - [`KT-12887`](https://youtrack.jetbrains.com/issue/KT-12887) "Extend selection" should select call's invoked expression
+- [`KT-13455`](https://youtrack.jetbrains.com/issue/KT-13455) Override/Implement: Make return type non-nullable (platform collection case) when overriding Java method
 - Fix exception when choose Gradle configurer after project is synced
 - Allow configuring Kotlin in Gradle module without Kotlin sources
 - Show all Kotlin annotations when browsing hierarchy of "java.lang.Annotation"
