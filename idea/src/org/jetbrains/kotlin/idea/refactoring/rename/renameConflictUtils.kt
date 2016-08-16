@@ -287,7 +287,9 @@ private fun checkUsagesRetargeting(
             continue
         }
 
-        usageIterator.set(UsageInfoWithReplacement(fullCallExpression, declaration, qualifiedExpression))
+        if (fullCallExpression !is KtQualifiedExpression) {
+            usageIterator.set(UsageInfoWithReplacement(fullCallExpression, declaration, qualifiedExpression))
+        }
     }
 }
 
