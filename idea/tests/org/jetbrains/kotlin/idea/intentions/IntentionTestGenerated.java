@@ -7249,6 +7249,12 @@ public class IntentionTestGenerated extends AbstractIntentionTest {
             doTest(fileName);
         }
 
+        @TestMetadata("asSequenceOnly.kt")
+        public void testAsSequenceOnly() throws Exception {
+            String fileName = KotlinTestUtils.navigationMetadata("idea/testData/intentions/loopToCallChain/asSequenceOnly.kt");
+            doTest(fileName);
+        }
+
         @TestMetadata("assignFilter.kt")
         public void testAssignFilter() throws Exception {
             String fileName = KotlinTestUtils.navigationMetadata("idea/testData/intentions/loopToCallChain/assignFilter.kt");
