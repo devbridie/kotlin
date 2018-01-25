@@ -14,6 +14,7 @@ internal class A {
         val f = map.keys.size
         val g = map.values.size
         val h = map.entries.size
+        val i = map[1] ?: 99
     }
 
     fun bar(list: MutableList<String>, map: HashMap<String, Int>) {

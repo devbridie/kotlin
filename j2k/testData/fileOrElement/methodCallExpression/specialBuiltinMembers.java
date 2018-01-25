@@ -14,6 +14,7 @@ class A {
         int f = map.keySet().size();
         int g = map.values().size();
         int h = map.entrySet().size();
+        int i = map.getOrDefault(1, 99);
     }
 
     void bar(List<String> list, HashMap<String, Integer> map) {

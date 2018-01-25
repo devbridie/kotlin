@@ -21,6 +21,7 @@ import com.intellij.psi.CommonClassNames.JAVA_LANG_OBJECT
 import com.intellij.psi.CommonClassNames.JAVA_LANG_STRING
 import com.intellij.psi.impl.PsiExpressionEvaluator
 import org.jetbrains.kotlin.j2k.ast.*
+import org.jetbrains.kotlin.lexer.KtTokens
 import java.io.PrintStream
 import java.util.*
 
@@ -82,7 +83,10 @@ enum class SpecialMethod(val qualifiedClassName: String?, val methodName: String
     },
 
     MAP_GET_OR_DEFAULT(Map::class.java.name, "getOrDefault", 2) {
-        override fun ConvertCallData.convertCall() = convertWithReceiverCast()
+        override fun ConvertCallData.convertCall(): BinaryExpression {
+            val arrayAccess = ArrayAccessExpression(codeConverter.convertExpression(qualifier), codeConverter.convertExpression(arguments[0]), false)
+            return BinaryExpression(arrayAccess, codeConverter.convertExpression(arguments[1]), Operator(KtTokens.ELVIS).assignNoPrototype())
+        }
     },
 
     MAP_VALUES(Map::class.java.name, "values", 0) {
