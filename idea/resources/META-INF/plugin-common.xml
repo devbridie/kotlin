@@ -3248,8 +3248,8 @@
                      language="kotlin"
     />
 
-    <localInspection implementationClass="org.jetbrains.kotlin.idea.inspections.ReplaceIntRangeStart/EndInclusiveWithFirst/LastInspection"
-                     displayName="Replace IntRange 'start'/'endInclusive' with 'first'/ 'last'"
+    <localInspection implementationClass="org.jetbrains.kotlin.idea.inspections.ReplaceIntRangeStartEndInclusiveWithFirstLastInspection"
+                     displayName="Replace IntRange 'start' or 'endInclusive' with kotlin.collections 'first' or'last'"
                      groupPath="Kotlin"
                      groupName="Style issues"
                      enabledByDefault="true"

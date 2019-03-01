@@ -7,7 +7,6 @@ package org.jetbrains.kotlin.idea.inspections
 
 import com.intellij.codeInspection.LocalQuickFix
 import com.intellij.codeInspection.ProblemDescriptor
-import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElementVisitor
@@ -17,7 +16,7 @@ import org.jetbrains.kotlin.psi.KtCallExpression
 import org.jetbrains.kotlin.psi.KtPsiFactory
 import org.jetbrains.kotlin.psi.callExpressionVisitor
 
-class ReplaceIntRangeStart-EndInclusiveWithFirst-Last : AbstractKotlinInspection() {
+class ReplaceIntRangeStartEndInclusiveWithFirstLastInspection : AbstractKotlinInspection() {
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
         return callExpressionVisitor { callExpression ->
             if (callExpression.isStart()) {
@@ -25,14 +24,12 @@ class ReplaceIntRangeStart-EndInclusiveWithFirst-Last : AbstractKotlinInspection
                     callExpression,
                     "Could be replaced with `first`",
                     ReplaceIntRangeStartWithFirstQuickFix()
-                    )
                 )
             } else if (callExpression.isEndInclusive()) {
                 holder.registerProblem(
                     callExpression,
                     "Could be replaced with `last`",
                     ReplaceIntRangeEndInclusiveWithLastQuickFix()
-                    )
                 )
             }
         }
@@ -62,9 +59,9 @@ class ReplaceIntRangeEndInclusiveWithLastQuickFix : LocalQuickFix {
 }
 
 private fun KtCallExpression.isStart(): Boolean {
-    return this.valueArguments.isEmpty() && isCalling(FqName("kotlin.ranges.IntRange.start"))
+    return isCalling(FqName("kotlin.ranges.IntRange.start")) && this.valueArguments.isEmpty()
 }
 
 private fun KtCallExpression.isEndInclusive(): Boolean {
-    return this.valueArguments.isEmpty() && isCalling(FqName("kotlin.ranges.IntRange.endInclusive"))
+    return isCalling(FqName("kotlin.ranges.IntRange.endInclusive")) && this.valueArguments.isEmpty()
 }

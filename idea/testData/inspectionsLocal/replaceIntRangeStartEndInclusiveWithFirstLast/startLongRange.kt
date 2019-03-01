@@ -2,6 +2,6 @@
 // WITH_RUNTIME
 
 fun foo() {
-    var range : CharRange  = 1..4
+    var range : LongRange = 1..2
     range.start
 }
