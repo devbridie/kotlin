@@ -20,18 +20,18 @@ import org.jetbrains.kotlin.psi.callExpressionVisitor
 class ReplaceIntRangeStart-EndInclusiveWithFirst-Last : AbstractKotlinInspection() {
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
         return callExpressionVisitor { callExpression ->
-            if (callExpression.isStart) {
+            if (callExpression.isStart()) {
                 holder.registerProblem(
                     callExpression,
                     "Could be replaced with `first`",
                     ReplaceIntRangeStartWithFirstQuickFix()
                     )
                 )
-            } else if (callExpression.isEndInclusive) {
+            } else if (callExpression.isEndInclusive()) {
                 holder.registerProblem(
                     callExpression,
                     "Could be replaced with `last`",
-                    ReplaceIntRangeEndIncusiveWithLastQuickFix()
+                    ReplaceIntRangeEndInclusiveWithLastQuickFix()
                     )
                 )
             }
@@ -50,7 +50,7 @@ class ReplaceIntRangeStartWithFirstQuickFix : LocalQuickFix {
     }
 }
 
-class ReplaceIntRangeEndIncusiveWithLastQuickFix : LocalQuickFix {
+class ReplaceIntRangeEndInclusiveWithLastQuickFix : LocalQuickFix {
     override fun getName() = "Replace 'endInclusive' with 'last'"
 
     override fun getFamilyName() = name
@@ -62,9 +62,9 @@ class ReplaceIntRangeEndIncusiveWithLastQuickFix : LocalQuickFix {
 }
 
 private fun KtCallExpression.isStart(): Boolean {
-    return this.valueArguments.isEmpty() && isCalling(FqName("kotlin.IntRange.start"))
+    return this.valueArguments.isEmpty() && isCalling(FqName("kotlin.ranges.IntRange.start"))
 }
 
 private fun KtCallExpression.isEndInclusive(): Boolean {
-    return this.valueArguments.isEmpty() && isCalling(FqName("kotlin.IntRange.endInclusive"))
+    return this.valueArguments.isEmpty() && isCalling(FqName("kotlin.ranges.IntRange.endInclusive"))
 }
