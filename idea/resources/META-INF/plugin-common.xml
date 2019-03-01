@@ -3248,6 +3248,15 @@
                      language="kotlin"
     />
 
+    <localInspection implementationClass="org.jetbrains.kotlin.idea.inspections.ReplaceIntRangeStart/EndInclusiveWithFirst/LastInspection"
+                     displayName="Replace IntRange 'start'/'endInclusive' with 'first'/ 'last'"
+                     groupPath="Kotlin"
+                     groupName="Style issues"
+                     enabledByDefault="true"
+                     level="WEAK WARNING"
+                     language="kotlin"
+    />
+
     <localInspection implementationClass="org.jetbrains.kotlin.idea.inspections.RedundantRequireNotNullCallInspection"
                      displayName="Redundant 'requireNotNull' or 'checkNotNull' call"
                      groupPath="Kotlin"
