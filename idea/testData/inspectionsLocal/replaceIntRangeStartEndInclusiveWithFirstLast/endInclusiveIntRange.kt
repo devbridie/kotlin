@@ -2,5 +2,5 @@
 
 fun foo() {
     var range : IntRange = 1..2
-    range.endInclusive
+    range.<caret>endInclusive
 }

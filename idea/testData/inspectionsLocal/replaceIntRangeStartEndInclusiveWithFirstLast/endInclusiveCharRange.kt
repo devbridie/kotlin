@@ -2,6 +2,6 @@
 // WITH_RUNTIME
 
 fun foo() {
-    var range : CharRange = 1..2
-    range.endInclusive
+    var range : CharRange = 'a' .. 'z'
+    range.<caret>endInclusive
 }

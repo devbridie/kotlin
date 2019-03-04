@@ -2,6 +2,6 @@
 // WITH_RUNTIME
 
 fun foo() {
-    var range : LongRange = 1..2
-    range.start
+    var range : LongRange = 1L..2L
+    range.<caret>start
 }
