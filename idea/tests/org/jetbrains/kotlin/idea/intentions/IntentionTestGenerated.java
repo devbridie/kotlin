@@ -5411,6 +5411,24 @@ public class IntentionTestGenerated extends AbstractIntentionTest {
         }
     }
 
+    @TestMetadata("idea/testData/intentions/convertJavaCollectionConstructorToFunctionCall")
+    @TestDataPath("$PROJECT_ROOT")
+    @RunWith(JUnit3RunnerWithInners.class)
+    public static class ConvertJavaCollectionConstructorToFunctionCall extends AbstractIntentionTest {
+        private void runTest(String testDataFilePath) throws Exception {
+            KotlinTestUtils.runTest(this::doTest, TargetBackend.ANY, testDataFilePath);
+        }
+
+        public void testAllFilesPresentInConvertJavaCollectionConstructorToFunctionCall() throws Exception {
+            KotlinTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("idea/testData/intentions/convertJavaCollectionConstructorToFunctionCall"), Pattern.compile("^([\\w\\-_]+)\\.(kt|kts)$"), TargetBackend.ANY, true);
+        }
+
+        @TestMetadata("replaceArrayListCall.kt")
+        public void testReplaceArrayListCall() throws Exception {
+            runTest("idea/testData/intentions/convertJavaCollectionConstructorToFunctionCall/replaceArrayListCall.kt");
+        }
+    }
+
     @TestMetadata("idea/testData/intentions/convertLambdaToReference")
     @TestDataPath("$PROJECT_ROOT")
     @RunWith(JUnit3RunnerWithInners.class)
