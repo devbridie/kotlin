@@ -19,7 +19,9 @@ import org.jetbrains.kotlin.ir.declarations.impl.IrAnonymousInitializerImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrFieldImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrVariableImpl
 import org.jetbrains.kotlin.ir.expressions.*
-import org.jetbrains.kotlin.ir.expressions.impl.*
+import org.jetbrains.kotlin.ir.expressions.impl.IrGetFieldImpl
+import org.jetbrains.kotlin.ir.expressions.impl.IrGetValueImpl
+import org.jetbrains.kotlin.ir.expressions.impl.IrSetFieldImpl
 import org.jetbrains.kotlin.ir.symbols.IrFieldSymbol
 import org.jetbrains.kotlin.ir.symbols.impl.IrAnonymousInitializerSymbolImpl
 import org.jetbrains.kotlin.ir.symbols.impl.IrFieldSymbolImpl
@@ -31,7 +33,6 @@ import org.jetbrains.kotlin.ir.util.isObject
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
 import org.jetbrains.kotlin.ir.visitors.transformChildrenVoid
 import org.jetbrains.kotlin.load.java.JvmAbi.JVM_FIELD_ANNOTATION_FQ_NAME
-import org.jetbrains.kotlin.name.Name
 
 internal val moveCompanionObjectFieldsPhase = makeIrFilePhase(
     ::MoveCompanionObjectFieldsLowering,
@@ -169,19 +170,12 @@ private class MoveCompanionObjectFieldsLowering(val context: CommonBackendContex
     }
 
     private fun createStaticBackingField(oldField: IrField, propertyParent: IrClass, fieldParent: IrClass): IrField {
-        val newName = if (fieldParent == propertyParent ||
-            oldField.hasAnnotation(JVM_FIELD_ANNOTATION_FQ_NAME) ||
-            oldField.correspondingProperty?.isConst == true
-        )
-            oldField.name
-        else
-            Name.identifier(oldField.name.toString() + "\$companion")
         val descriptor = WrappedFieldDescriptor(oldField.descriptor.annotations, oldField.descriptor.source)
         val field = IrFieldImpl(
             oldField.startOffset, oldField.endOffset,
             IrDeclarationOrigin.PROPERTY_BACKING_FIELD,
             IrFieldSymbolImpl(descriptor),
-            newName, oldField.type, oldField.visibility,
+            oldField.name, oldField.type, oldField.visibility,
             isFinal = oldField.isFinal,
             isExternal = oldField.isExternal,
             isStatic = true
@@ -189,6 +183,7 @@ private class MoveCompanionObjectFieldsLowering(val context: CommonBackendContex
             descriptor.bind(this)
             parent = fieldParent
             annotations.addAll(oldField.annotations)
+            metadata = oldField.metadata
         }
         val oldInitializer = oldField.initializer
         if (oldInitializer != null) {

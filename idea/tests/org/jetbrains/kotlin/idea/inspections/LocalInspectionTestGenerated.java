@@ -1679,6 +1679,16 @@ public class LocalInspectionTestGenerated extends AbstractLocalInspectionTest {
                 runTest("idea/testData/inspectionsLocal/conventionNameCalls/replaceCallWithBinaryOperator/equalsDoubleSmartCast.kt");
             }
 
+            @TestMetadata("equalsDoubleSmartCast2.kt")
+            public void testEqualsDoubleSmartCast2() throws Exception {
+                runTest("idea/testData/inspectionsLocal/conventionNameCalls/replaceCallWithBinaryOperator/equalsDoubleSmartCast2.kt");
+            }
+
+            @TestMetadata("equalsDoubleSmartCast3.kt")
+            public void testEqualsDoubleSmartCast3() throws Exception {
+                runTest("idea/testData/inspectionsLocal/conventionNameCalls/replaceCallWithBinaryOperator/equalsDoubleSmartCast3.kt");
+            }
+
             @TestMetadata("equalsDoubleSmartCastFromGeneric.kt")
             public void testEqualsDoubleSmartCastFromGeneric() throws Exception {
                 runTest("idea/testData/inspectionsLocal/conventionNameCalls/replaceCallWithBinaryOperator/equalsDoubleSmartCastFromGeneric.kt");
@@ -4157,6 +4167,11 @@ public class LocalInspectionTestGenerated extends AbstractLocalInspectionTest {
         public void testSuspendLambda() throws Exception {
             runTest("idea/testData/inspectionsLocal/moveLambdaOutsideParentheses/suspendLambda.kt");
         }
+
+        @TestMetadata("typeParameter.kt")
+        public void testTypeParameter() throws Exception {
+            runTest("idea/testData/inspectionsLocal/moveLambdaOutsideParentheses/typeParameter.kt");
+        }
     }
 
     @TestMetadata("idea/testData/inspectionsLocal/moveSuspiciousCallableReferenceIntoParentheses")
@@ -4264,6 +4279,54 @@ public class LocalInspectionTestGenerated extends AbstractLocalInspectionTest {
         @TestMetadata("variableReceiver.kt")
         public void testVariableReceiver() throws Exception {
             runTest("idea/testData/inspectionsLocal/moveSuspiciousCallableReferenceIntoParentheses/variableReceiver.kt");
+        }
+    }
+
+    @TestMetadata("idea/testData/inspectionsLocal/moveVariableDeclarationIntoWhen")
+    @TestDataPath("$PROJECT_ROOT")
+    @RunWith(JUnit3RunnerWithInners.class)
+    public static class MoveVariableDeclarationIntoWhen extends AbstractLocalInspectionTest {
+        private void runTest(String testDataFilePath) throws Exception {
+            KotlinTestUtils.runTest(this::doTest, TargetBackend.ANY, testDataFilePath);
+        }
+
+        public void testAllFilesPresentInMoveVariableDeclarationIntoWhen() throws Exception {
+            KotlinTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("idea/testData/inspectionsLocal/moveVariableDeclarationIntoWhen"), Pattern.compile("^([\\w\\-_]+)\\.(kt|kts)$"), TargetBackend.ANY, true);
+        }
+
+        @TestMetadata("notApplicableOtherName.kt")
+        public void testNotApplicableOtherName() throws Exception {
+            runTest("idea/testData/inspectionsLocal/moveVariableDeclarationIntoWhen/notApplicableOtherName.kt");
+        }
+
+        @TestMetadata("notApplicableSideEffect.kt")
+        public void testNotApplicableSideEffect() throws Exception {
+            runTest("idea/testData/inspectionsLocal/moveVariableDeclarationIntoWhen/notApplicableSideEffect.kt");
+        }
+
+        @TestMetadata("notApplicableUsedInOtherScope.kt")
+        public void testNotApplicableUsedInOtherScope() throws Exception {
+            runTest("idea/testData/inspectionsLocal/moveVariableDeclarationIntoWhen/notApplicableUsedInOtherScope.kt");
+        }
+
+        @TestMetadata("notApplicableVar.kt")
+        public void testNotApplicableVar() throws Exception {
+            runTest("idea/testData/inspectionsLocal/moveVariableDeclarationIntoWhen/notApplicableVar.kt");
+        }
+
+        @TestMetadata("simple.kt")
+        public void testSimple() throws Exception {
+            runTest("idea/testData/inspectionsLocal/moveVariableDeclarationIntoWhen/simple.kt");
+        }
+
+        @TestMetadata("withComment.kt")
+        public void testWithComment() throws Exception {
+            runTest("idea/testData/inspectionsLocal/moveVariableDeclarationIntoWhen/withComment.kt");
+        }
+
+        @TestMetadata("withNewLine.kt")
+        public void testWithNewLine() throws Exception {
+            runTest("idea/testData/inspectionsLocal/moveVariableDeclarationIntoWhen/withNewLine.kt");
         }
     }
 
@@ -4909,6 +4972,11 @@ public class LocalInspectionTestGenerated extends AbstractLocalInspectionTest {
         @TestMetadata("default.kt")
         public void testDefault() throws Exception {
             runTest("idea/testData/inspectionsLocal/redundantGetter/default.kt");
+        }
+
+        @TestMetadata("external.kt")
+        public void testExternal() throws Exception {
+            runTest("idea/testData/inspectionsLocal/redundantGetter/external.kt");
         }
 
         @TestMetadata("fieldExpression.kt")

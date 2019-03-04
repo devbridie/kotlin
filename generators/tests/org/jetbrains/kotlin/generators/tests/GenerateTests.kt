@@ -636,10 +636,6 @@ fun main(args: Array<String>) {
             model("debugger/smartStepInto")
         }
 
-        testClass<AbstractBeforeExtractFunctionInsertionTest> {
-            model("debugger/insertBeforeExtractFunction", extension = "kt")
-        }
-
         testClass<AbstractKotlinSteppingTest> {
             model("debugger/tinyApp/src/stepping/stepIntoAndSmartStepInto", pattern = KT_WITHOUT_DOTS_IN_NAME, testMethod = "doStepIntoTest", testClassName = "StepInto")
             model("debugger/tinyApp/src/stepping/stepIntoAndSmartStepInto", pattern = KT_WITHOUT_DOTS_IN_NAME, testMethod = "doSmartStepIntoTest", testClassName = "SmartStepInto")
@@ -654,6 +650,10 @@ fun main(args: Array<String>) {
         testClass<AbstractKotlinEvaluateExpressionTest> {
             model("debugger/tinyApp/src/evaluate/singleBreakpoint", testMethod = "doSingleBreakpointTest")
             model("debugger/tinyApp/src/evaluate/multipleBreakpoints", testMethod = "doMultipleBreakpointsTest")
+        }
+
+        testClass<AbstractAsyncStackTraceTest> {
+            model("debugger/tinyApp/src/asyncStackTrace")
         }
 
         testClass<AbstractFileRankingTest> {

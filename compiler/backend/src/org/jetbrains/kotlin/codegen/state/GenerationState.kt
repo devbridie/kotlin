@@ -24,16 +24,19 @@ import org.jetbrains.kotlin.descriptors.ScriptDescriptor
 import org.jetbrains.kotlin.diagnostics.Diagnostic
 import org.jetbrains.kotlin.diagnostics.DiagnosticSink
 import org.jetbrains.kotlin.idea.MainFunctionDetector
+import org.jetbrains.kotlin.load.java.components.JavaDeprecationSettings
 import org.jetbrains.kotlin.load.kotlin.incremental.components.IncrementalCache
 import org.jetbrains.kotlin.metadata.jvm.deserialization.JvmMetadataVersion
 import org.jetbrains.kotlin.modules.TargetId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.psi.KtClassOrObject
+import org.jetbrains.kotlin.psi.KtCodeFragment
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtScript
 import org.jetbrains.kotlin.resolve.*
 import org.jetbrains.kotlin.resolve.deprecation.CoroutineCompatibilitySupport
 import org.jetbrains.kotlin.resolve.deprecation.DeprecationResolver
+import org.jetbrains.kotlin.resolve.deprecation.DeprecationSettings
 import org.jetbrains.kotlin.resolve.diagnostics.Diagnostics
 import org.jetbrains.kotlin.resolve.jvm.JvmClassName
 import org.jetbrains.kotlin.resolve.jvm.diagnostics.JvmDeclarationOrigin
@@ -118,18 +121,17 @@ class GenerationState private constructor(
         abstract fun shouldGenerateClass(processingClassOrObject: KtClassOrObject): Boolean
         abstract fun shouldGeneratePackagePart(ktFile: KtFile): Boolean
         abstract fun shouldGenerateScript(script: KtScript): Boolean
+        abstract fun shouldGenerateCodeFragment(script: KtCodeFragment): Boolean
         open fun shouldGenerateClassMembers(processingClassOrObject: KtClassOrObject) = shouldGenerateClass(processingClassOrObject)
 
         companion object {
             @JvmField
             val GENERATE_ALL: GenerateClassFilter = object : GenerateClassFilter() {
                 override fun shouldAnnotateClass(processingClassOrObject: KtClassOrObject): Boolean = true
-
                 override fun shouldGenerateClass(processingClassOrObject: KtClassOrObject): Boolean = true
-
                 override fun shouldGenerateScript(script: KtScript): Boolean = true
-
                 override fun shouldGeneratePackagePart(ktFile: KtFile): Boolean = true
+                override fun shouldGenerateCodeFragment(script: KtCodeFragment) = true
             }
         }
     }
@@ -143,7 +145,7 @@ class GenerationState private constructor(
         CompilerDeserializationConfiguration(configuration.languageVersionSettings)
 
     val deprecationProvider =
-        DeprecationResolver(LockBasedStorageManager.NO_LOCKS, configuration.languageVersionSettings, CoroutineCompatibilitySupport.ENABLED)
+        DeprecationResolver(LockBasedStorageManager.NO_LOCKS, configuration.languageVersionSettings, CoroutineCompatibilitySupport.ENABLED, JavaDeprecationSettings)
 
     init {
         val icComponents = configuration.get(JVMConfigurationKeys.INCREMENTAL_COMPILATION_COMPONENTS)

@@ -32,22 +32,19 @@ dependencies {
     testRuntime("org.sonatype.aether:aether-api:1.13.1")
     testRuntime("org.apache.maven:maven-core:3.0.3")
     compileOnly(intellijDep()) { includeJars("openapi", "util") }
+    testCompile(intellijDep()) { includeJars("openapi", "platform-api", "util") }
 
-    if (Platform[173].orLower()) {
-        testCompile(intellijDep()) { includeJars("openapi", "util") }
-    } else {
-        testCompile(intellijDep()) { includeJars("openapi", "platform-api", "util") }
-    }
 }
 
 projectTest {
     workingDir = rootDir
 }
 
+publish()
+
 runtimeJar()
 sourcesJar()
 javadocJar()
 
-publish()
 
 ideaPlugin()

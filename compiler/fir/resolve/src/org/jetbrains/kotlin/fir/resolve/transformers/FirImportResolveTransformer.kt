@@ -13,12 +13,11 @@ import org.jetbrains.kotlin.fir.declarations.impl.FirResolvedImportImpl
 import org.jetbrains.kotlin.fir.declarations.impl.FirResolvedPackageStarImport
 import org.jetbrains.kotlin.fir.resolve.FirSymbolProvider
 import org.jetbrains.kotlin.fir.visitors.CompositeTransformResult
-import org.jetbrains.kotlin.fir.visitors.FirTransformer
 import org.jetbrains.kotlin.fir.visitors.compose
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 
-class FirImportResolveTransformer() : FirTransformer<Nothing?>() {
+class FirImportResolveTransformer() : FirAbstractTreeTransformer() {
     override fun <E : FirElement> transformElement(element: E, data: Nothing?): CompositeTransformResult<E> {
         return element.compose()
     }
@@ -54,7 +53,7 @@ class FirImportResolveTransformer() : FirTransformer<Nothing?>() {
                 firstPart = firstPart.parent()
 
                 val resolvedFqName = ClassId(firstPart, FqName(lastPart.toString()), false)
-                val foundSymbol = symbolProvider.getSymbolByFqName(resolvedFqName)
+                val foundSymbol = symbolProvider.getClassLikeSymbolByFqName(resolvedFqName)
 
                 if (foundSymbol != null) {
                     return FirResolvedImportImpl(import, resolvedFqName).compose()

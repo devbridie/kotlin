@@ -215,10 +215,17 @@ class TypeOperatorLowering(val context: JsIrBackendContext) : FileLoweringPass {
 //                    toType.isChar() -> generateCheckForChar(argument)
                     toType.isNumber() -> generateNumberCheck(argument)
                     toType.isComparable() -> generateComparableCheck(argument)
+                    toType.isCharSequence() -> generateCharSequenceCheck(argument)
                     toType.isArray() -> generateGenericArrayCheck(argument)
                     toType.isPrimitiveArray() -> generatePrimitiveArrayTypeCheck(argument, toType)
                     toType.isTypeParameter() -> generateTypeCheckWithTypeParameter(argument, toType)
-                    toType.isInterface() -> generateInterfaceCheck(argument, toType)
+                    toType.isInterface() -> {
+                        if ((toType.classifierOrFail.owner as IrClass).isEffectivelyExternal()) {
+                            generateIsObjectCheck(argument)
+                        } else {
+                            generateInterfaceCheck(argument, toType)
+                        }
+                    }
                     else -> generateNativeInstanceOf(argument, toType)
                 }
             }
@@ -274,6 +281,9 @@ class TypeOperatorLowering(val context: JsIrBackendContext) : FileLoweringPass {
 
             private fun generateComparableCheck(argument: IrExpression) =
                 JsIrBuilder.buildCall(context.intrinsics.isComparableSymbol).apply { putValueArgument(0, argument) }
+
+            private fun generateCharSequenceCheck(argument: IrExpression) =
+                JsIrBuilder.buildCall(context.intrinsics.isCharSequenceSymbol).apply { putValueArgument(0, argument) }
 
             private fun generatePrimitiveArrayTypeCheck(argument: IrExpression, toType: IrType): IrExpression {
                 val f = context.intrinsics.isPrimitiveArray[toType.getPrimitiveArrayElementType()]!!

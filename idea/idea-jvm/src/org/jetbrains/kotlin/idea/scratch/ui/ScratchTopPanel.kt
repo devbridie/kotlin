@@ -18,6 +18,7 @@ package org.jetbrains.kotlin.idea.scratch.ui
 
 
 import com.intellij.application.options.ModulesComboBox
+import com.intellij.execution.ui.ConfigurationModuleSelector
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.ActionPlaces
@@ -62,6 +63,7 @@ class ScratchTopPanel private constructor(val scratchFile: ScratchFile) : JPanel
     private val isMakeBeforeRunCheckbox: JCheckBox
     private val isInteractiveCheckbox: JCheckBox
 
+    private val moduleSeparator: JSeparator
     private val actionsToolbar: ActionToolbar
 
     init {
@@ -80,7 +82,10 @@ class ScratchTopPanel private constructor(val scratchFile: ScratchFile) : JPanel
             }
         }
 
-        add(JSeparator(SwingConstants.VERTICAL))
+        moduleSeparator = JSeparator(SwingConstants.VERTICAL)
+        add(moduleSeparator)
+
+        changeMakeModuleCheckboxVisibility(false)
 
         isInteractiveCheckbox = JCheckBox("Interactive mode")
         add(isInteractiveCheckbox)
@@ -115,11 +120,14 @@ class ScratchTopPanel private constructor(val scratchFile: ScratchFile) : JPanel
         moduleChooser.selectedModule = module
     }
 
-    fun addModuleListener(f: (PsiFile, Module) -> Unit) {
+    fun addModuleListener(f: (PsiFile, Module?) -> Unit) {
         moduleChooser.addActionListener {
             val selectedModule = moduleChooser.selectedModule
+
+            changeMakeModuleCheckboxVisibility(selectedModule != null)
+
             val psiFile = scratchFile.getPsiFile()
-            if (selectedModule != null && psiFile != null) {
+            if (psiFile != null) {
                 f(psiFile, selectedModule)
             }
         }
@@ -138,6 +146,11 @@ class ScratchTopPanel private constructor(val scratchFile: ScratchFile) : JPanel
     @TestOnly
     fun setInteractiveMode(isSelected: Boolean) {
         isInteractiveCheckbox.isSelected = isSelected
+    }
+
+    private fun changeMakeModuleCheckboxVisibility(isVisible: Boolean) {
+        isMakeBeforeRunCheckbox.isVisible = isVisible
+        moduleSeparator.isVisible = isVisible
     }
 
     fun updateToolbar() {
@@ -162,6 +175,7 @@ class ScratchTopPanel private constructor(val scratchFile: ScratchFile) : JPanel
             setModules(ModuleManager.getInstance(project).modules.filter {
                 it.productionSourceInfo() != null || it.testSourceInfo() != null
             })
+            allowEmptySelection(ConfigurationModuleSelector.NO_MODULE_TEXT)
         }
     }
 }

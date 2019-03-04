@@ -407,10 +407,26 @@ object KeywordCompletion {
 
                         is KtObjectDeclaration -> if (ownerDeclaration.isObjectLiteral()) KotlinTarget.OBJECT_LITERAL else KotlinTarget.OBJECT
 
-                        else -> return true
+                        else -> return keywordTokenType != CONST_KEYWORD
                     }
 
                     if (!ModifierCheckerCore.isPossibleParentTarget(keywordTokenType, parentTarget, languageVersionSettings)) return false
+
+                    if (keywordTokenType == CONST_KEYWORD) {
+                        return when (parentTarget) {
+                            KotlinTarget.OBJECT -> true
+                            KotlinTarget.FILE -> {
+                                val prevSiblings = elementAt.parent.siblings(withItself = false, forward = false)
+                                val hasLineBreak = prevSiblings
+                                    .takeWhile { it is PsiWhiteSpace || it.isSemicolon() }
+                                    .firstOrNull { it.text.contains("\n") || it.isSemicolon() } != null
+                                hasLineBreak || prevSiblings.none {
+                                    it !is PsiWhiteSpace && !it.isSemicolon() && it !is KtImportList && it !is KtPackageDirective
+                                }
+                            }
+                            else -> false
+                        }
+                    }
 
                     return true
                 }
@@ -422,6 +438,8 @@ object KeywordCompletion {
             return files.any { file -> isKeywordCorrectlyApplied(keywordTokenType, file); }
         }
     }
+
+    private fun PsiElement.isSemicolon() = node.elementType == KtTokens.SEMICOLON
 
     private fun isErrorElementBefore(token: PsiElement): Boolean {
         for (leaf in token.prevLeafs) {
@@ -470,20 +488,18 @@ object KeywordCompletion {
         }
     }
 
-    private fun isModifierParentSupportedAtLanguageLevel(
-            keyword: KtKeywordToken,
-            target: KotlinTarget,
-            languageVersionSettings: LanguageVersionSettings
-    ): Boolean {
-        if (keyword == KtTokens.INNER_KEYWORD && target == ENUM_ENTRY) {
-            return languageVersionSettings.supportsFeature(LanguageFeature.InnerClassInEnumEntryClass)
-        }
-        return true
-    }
-
     // builds text within scope (or from the start of the file) before position element excluding almost all declarations
     private fun buildReducedContextBefore(builder: StringBuilder, position: PsiElement, scope: PsiElement?) {
         if (position == scope) return
+
+        if (position is KtCodeFragment) {
+            val ktContext = position.context as? KtElement ?: return
+            buildReducedContextBefore(builder, ktContext, scope)
+            return
+        } else if (position is PsiFile) {
+            return
+        }
+
         val parent = position.parent ?: return
 
         buildReducedContextBefore(builder, parent, scope)

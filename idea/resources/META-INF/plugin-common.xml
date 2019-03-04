@@ -226,7 +226,7 @@
                         serviceImplementation="org.jetbrains.kotlin.idea.KotlinPluginUpdater"/>
 
     <projectService serviceInterface="org.jetbrains.kotlin.idea.util.ImportInsertHelper"
-                    serviceImplementation="org.jetbrains.kotlin.util.ImportInsertHelperImpl"/>
+                    serviceImplementation="org.jetbrains.kotlin.idea.util.ImportInsertHelperImpl"/>
 
     <applicationService serviceInterface="org.jetbrains.kotlin.psi.KotlinDeclarationNavigationPolicy"
                         serviceImplementation="org.jetbrains.kotlin.idea.decompiler.navigation.KotlinDeclarationNavigationPolicyImpl"/>
@@ -383,7 +383,7 @@
     <lang.commenter language="kotlin" implementationClass="org.jetbrains.kotlin.idea.KotlinCommenter"/>
     <lang.psiStructureViewFactory language="kotlin" implementationClass="org.jetbrains.kotlin.idea.structureView.KotlinStructureViewFactory"/>
     <structureViewBuilder order="first" key="CLASS" factoryClass="org.jetbrains.kotlin.idea.structureView.KtClsStructureViewBuilderProvider"/>
-    <editorNotificationProvider implementation="org.jetbrains.kotlin.idea.script.configutation.MultipleScriptDefinitionsChecker"/>
+    <editorNotificationProvider implementation="org.jetbrains.kotlin.idea.script.configuration.MultipleScriptDefinitionsChecker"/>
     <editor.linePainter order="first" implementation="org.jetbrains.kotlin.idea.parameterInfo.custom.ReturnHintLinePainter"/>
 
     <lang.foldingBuilder language="kotlin" implementationClass="org.jetbrains.kotlin.idea.KotlinFoldingBuilder"/>
@@ -1217,7 +1217,7 @@
     </intentionAction>
 
     <intentionAction>
-      <className>org.jetbrains.kotlin.idea.refactoring.move.moveDeclarations.MoveDeclarationToSeparateFileIntention</className>
+      <className>org.jetbrains.kotlin.idea.refactoring.move.moveDeclarations.ExtractDeclarationFromCurrentFileIntention</className>
       <category>Kotlin</category>
     </intentionAction>
 
@@ -1358,6 +1358,11 @@
 
     <intentionAction>
       <className>org.jetbrains.kotlin.idea.intentions.IntroduceVariableIntention</className>
+      <category>Kotlin</category>
+    </intentionAction>
+
+    <intentionAction>
+      <className>org.jetbrains.kotlin.idea.intentions.IntroduceImportAliasIntention</className>
       <category>Kotlin</category>
     </intentionAction>
 
@@ -2925,6 +2930,15 @@
 
     <localInspection implementationClass="org.jetbrains.kotlin.idea.inspections.MoveLambdaOutsideParenthesesInspection"
                      displayName="Lambda argument inside parentheses"
+                     groupPath="Kotlin"
+                     groupName="Style issues"
+                     enabledByDefault="true"
+                     level="WEAK WARNING"
+                     language="kotlin"
+    />
+
+    <localInspection implementationClass="org.jetbrains.kotlin.idea.inspections.MoveVariableDeclarationIntoWhenInspection"
+                     displayName="Variable declaration could be moved inside `when`"
                      groupPath="Kotlin"
                      groupName="Style issues"
                      enabledByDefault="true"

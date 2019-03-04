@@ -1,14 +1,11 @@
 /*
- * Copyright 2010-2018 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license
+ * Copyright 2010-2019 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license
  * that can be found in the license/LICENSE.txt file.
  */
 
 package org.jetbrains.kotlin.codegen.inline
 
-import org.jetbrains.kotlin.codegen.AsmUtil
-import org.jetbrains.kotlin.codegen.ClosureCodegen
-import org.jetbrains.kotlin.codegen.IrExpressionLambda
-import org.jetbrains.kotlin.codegen.StackValue
+import org.jetbrains.kotlin.codegen.*
 import org.jetbrains.kotlin.codegen.coroutines.continuationAsmType
 import org.jetbrains.kotlin.codegen.coroutines.getOrCreateJvmSuspendFunctionView
 import org.jetbrains.kotlin.codegen.inline.FieldRemapper.Companion.foldName
@@ -343,12 +340,12 @@ class MethodInliner(
                                 // 'This' in outer context corresponds to outer instance in current
                                 visitFieldInsn(
                                     Opcodes.GETSTATIC, owner,
-                                    CAPTURED_FIELD_FOLD_PREFIX + AsmUtil.CAPTURED_THIS_FIELD, capturedParamDesc.type.descriptor
+                                    FieldRemapper.foldName(AsmUtil.CAPTURED_THIS_FIELD), capturedParamDesc.type.descriptor
                                 )
                             } else {
                                 visitFieldInsn(
                                     Opcodes.GETSTATIC, capturedParamDesc.containingLambdaName,
-                                    CAPTURED_FIELD_FOLD_PREFIX + capturedParamDesc.fieldName, capturedParamDesc.type.descriptor
+                                    FieldRemapper.foldName(capturedParamDesc.fieldName), capturedParamDesc.type.descriptor
                                 )
                             }
                         }
@@ -578,6 +575,23 @@ class MethodInliner(
                                     className, inliningContext.nameGenerator, isAlreadyRegenerated(className), fieldInsnNode
                                 )
                             )
+                        } else if (fieldInsnNode.isCheckAssertionsStatus()) {
+                            fieldInsnNode.owner = inlineCallSiteInfo.ownerClassName
+                            if (inliningContext.isInliningLambda) {
+                                if (inliningContext.lambdaInfo!!.isCrossInline) {
+                                    assert(inliningContext.parent?.parent is RegeneratedClassContext) {
+                                        "$inliningContext grandparent shall be RegeneratedClassContext but got ${inliningContext.parent?.parent}"
+                                    }
+                                    inliningContext.parent!!.parent!!.generateAssertField = true
+                                } else {
+                                    assert(inliningContext.parent != null) {
+                                        "$inliningContext parent shall not be null"
+                                    }
+                                    inliningContext.parent!!.generateAssertField = true
+                                }
+                            } else {
+                                inliningContext.generateAssertField = true
+                            }
                         }
                     }
 
@@ -1070,7 +1084,7 @@ class MethodInliner(
         private fun getCapturedFieldAccessChain(aload0: VarInsnNode): List<AbstractInsnNode> {
             val lambdaAccessChain = mutableListOf<AbstractInsnNode>(aload0).apply {
                 addAll(InsnSequence(aload0.next, null).filter { it.isMeaningful }.takeWhile { insnNode ->
-                    insnNode is FieldInsnNode && "this$0" == insnNode.name
+                    insnNode is FieldInsnNode && AsmUtil.CAPTURED_THIS_FIELD == insnNode.name
                 }.toList())
             }
 

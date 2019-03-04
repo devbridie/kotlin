@@ -89,6 +89,11 @@ public class ClassFileToSourceStubConverterTestGenerated extends AbstractClassFi
         runTest("plugins/kapt3/kapt3-compiler/testData/converter/defaultImpls.kt");
     }
 
+    @TestMetadata("enumImports.kt")
+    public void testEnumImports() throws Exception {
+        runTest("plugins/kapt3/kapt3-compiler/testData/converter/enumImports.kt");
+    }
+
     @TestMetadata("enums.kt")
     public void testEnums() throws Exception {
         runTest("plugins/kapt3/kapt3-compiler/testData/converter/enums.kt");
@@ -269,6 +274,11 @@ public class ClassFileToSourceStubConverterTestGenerated extends AbstractClassFi
         runTest("plugins/kapt3/kapt3-compiler/testData/converter/kt27126.kt");
     }
 
+    @TestMetadata("kt28306.kt")
+    public void testKt28306() throws Exception {
+        runTest("plugins/kapt3/kapt3-compiler/testData/converter/kt28306.kt");
+    }
+
     @TestMetadata("lazyProperty.kt")
     public void testLazyProperty() throws Exception {
         runTest("plugins/kapt3/kapt3-compiler/testData/converter/lazyProperty.kt");
@@ -362,6 +372,11 @@ public class ClassFileToSourceStubConverterTestGenerated extends AbstractClassFi
     @TestMetadata("repeatableAnnotations.kt")
     public void testRepeatableAnnotations() throws Exception {
         runTest("plugins/kapt3/kapt3-compiler/testData/converter/repeatableAnnotations.kt");
+    }
+
+    @TestMetadata("secondaryConstructor.kt")
+    public void testSecondaryConstructor() throws Exception {
+        runTest("plugins/kapt3/kapt3-compiler/testData/converter/secondaryConstructor.kt");
     }
 
     @TestMetadata("severalPackageParts.kt")

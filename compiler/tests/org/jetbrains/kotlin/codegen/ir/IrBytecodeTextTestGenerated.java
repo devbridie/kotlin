@@ -402,6 +402,39 @@ public class IrBytecodeTextTestGenerated extends AbstractIrBytecodeTextTest {
         }
     }
 
+    @TestMetadata("compiler/testData/codegen/bytecodeText/assert")
+    @TestDataPath("$PROJECT_ROOT")
+    @RunWith(JUnit3RunnerWithInners.class)
+    public static class Assert extends AbstractIrBytecodeTextTest {
+        private void runTest(String testDataFilePath) throws Exception {
+            KotlinTestUtils.runTest(this::doTest, TargetBackend.JVM_IR, testDataFilePath);
+        }
+
+        public void testAllFilesPresentInAssert() throws Exception {
+            KotlinTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("compiler/testData/codegen/bytecodeText/assert"), Pattern.compile("^(.+)\\.kt$"), TargetBackend.JVM_IR, true);
+        }
+
+        @TestMetadata("jvmCrossinline.kt")
+        public void testJvmCrossinline() throws Exception {
+            runTest("compiler/testData/codegen/bytecodeText/assert/jvmCrossinline.kt");
+        }
+
+        @TestMetadata("jvmCrossinlineAssertInLambda.kt")
+        public void testJvmCrossinlineAssertInLambda() throws Exception {
+            runTest("compiler/testData/codegen/bytecodeText/assert/jvmCrossinlineAssertInLambda.kt");
+        }
+
+        @TestMetadata("jvmInline.kt")
+        public void testJvmInline() throws Exception {
+            runTest("compiler/testData/codegen/bytecodeText/assert/jvmInline.kt");
+        }
+
+        @TestMetadata("jvmInlineLambda.kt")
+        public void testJvmInlineLambda() throws Exception {
+            runTest("compiler/testData/codegen/bytecodeText/assert/jvmInlineLambda.kt");
+        }
+    }
+
     @TestMetadata("compiler/testData/codegen/bytecodeText/boxing")
     @TestDataPath("$PROJECT_ROOT")
     @RunWith(JUnit3RunnerWithInners.class)
@@ -1123,6 +1156,11 @@ public class IrBytecodeTextTestGenerated extends AbstractIrBytecodeTextTest {
         @TestMetadata("returnUnitInLambda.kt")
         public void testReturnUnitInLambda_1_3() throws Exception {
             runTestWithPackageReplacement("compiler/testData/codegen/bytecodeText/coroutines/returnUnitInLambda.kt", "kotlin.coroutines");
+        }
+
+        @TestMetadata("throwOnFailure.kt")
+        public void testThrowOnFailure() throws Exception {
+            runTest("compiler/testData/codegen/bytecodeText/coroutines/throwOnFailure.kt");
         }
 
         @TestMetadata("varValueConflictsWithTable.kt")
@@ -3174,6 +3212,11 @@ public class IrBytecodeTextTestGenerated extends AbstractIrBytecodeTextTest {
         @TestMetadata("kt19037.kt")
         public void testKt19037() throws Exception {
             runTest("compiler/testData/codegen/bytecodeText/stringOperations/kt19037.kt");
+        }
+
+        @TestMetadata("multipleNestedConcat.kt")
+        public void testMultipleNestedConcat() throws Exception {
+            runTest("compiler/testData/codegen/bytecodeText/stringOperations/multipleNestedConcat.kt");
         }
 
         @TestMetadata("nestedConcat.kt")

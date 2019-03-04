@@ -16,8 +16,6 @@
 
 package org.jetbrains.kotlin.ir.util
 
-import org.jetbrains.kotlin.descriptors.Modality
-import org.jetbrains.kotlin.descriptors.Visibility
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.declarations.*
@@ -385,7 +383,7 @@ open class DeepCopyIrTreeWithSymbols(
                 symbolRemapper.getReferencedReturnableBlock(expression.symbol),
                 mapStatementOrigin(expression.origin),
                 expression.statements.map { it.transform() },
-                expression.sourceFileName
+                expression.sourceFileSymbol
             )
         else
             IrBlockImpl(
@@ -712,6 +710,24 @@ open class DeepCopyIrTreeWithSymbols(
             expression.startOffset, expression.endOffset,
             expression.type.remapType(),
             expression.value.transform()
+        )
+
+    override fun visitDynamicOperatorExpression(expression: IrDynamicOperatorExpression): IrDynamicOperatorExpression =
+        IrDynamicOperatorExpressionImpl(
+            expression.startOffset, expression.endOffset,
+            expression.type.remapType(),
+            expression.operator
+        ).apply {
+            receiver = expression.receiver.transform()
+            expression.arguments.mapTo(arguments) { it.transform() }
+        }
+
+    override fun visitDynamicMemberExpression(expression: IrDynamicMemberExpression): IrDynamicMemberExpression =
+        IrDynamicMemberExpressionImpl(
+            expression.startOffset, expression.endOffset,
+            expression.type.remapType(),
+            expression.memberName,
+            expression.receiver.transform()
         )
 
     override fun visitErrorDeclaration(declaration: IrErrorDeclaration): IrErrorDeclaration =

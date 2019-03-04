@@ -136,8 +136,12 @@ abstract class FirTransformer<in D> : FirVisitor<CompositeTransformResult<FirEle
         return transformElement(reference, data)
     }
 
-    open fun <E : FirReference> transformNamedReference(namedReference: E, data: D): CompositeTransformResult<E> {
+    open fun transformNamedReference(namedReference: FirNamedReference, data: D): CompositeTransformResult<FirNamedReference> {
         return transformReference(namedReference, data)
+    }
+
+    open fun transformResolvedCallableReference(resolvedCallableReference: FirResolvedCallableReference, data: D): CompositeTransformResult<FirNamedReference> {
+        return transformNamedReference(resolvedCallableReference, data)
     }
 
     open fun <E : FirReference> transformSuperReference(superReference: E, data: D): CompositeTransformResult<E> {
@@ -214,6 +218,10 @@ abstract class FirTransformer<in D> : FirVisitor<CompositeTransformResult<FirEle
 
     open fun transformTypeOperatorCall(typeOperatorCall: FirTypeOperatorCall, data: D): CompositeTransformResult<FirStatement> {
         return transformOperatorCall(typeOperatorCall, data)
+    }
+
+    open fun transformClassReferenceExpression(classReferenceExpression: FirClassReferenceExpression, data: D): CompositeTransformResult<FirStatement> {
+        return transformExpression(classReferenceExpression, data)
     }
 
     open fun <T> transformConstExpression(constExpression: FirConstExpression<T>, data: D): CompositeTransformResult<FirStatement> {
@@ -296,46 +304,6 @@ abstract class FirTransformer<in D> : FirVisitor<CompositeTransformResult<FirEle
         return transformTargetElement(labeledElement, data)
     }
 
-    open fun transformType(type: FirType, data: D): CompositeTransformResult<FirType> {
-        return transformElement(type, data)
-    }
-
-    open fun transformDelegatedType(delegatedType: FirDelegatedType, data: D): CompositeTransformResult<FirType> {
-        return transformType(delegatedType, data)
-    }
-
-    open fun transformErrorType(errorType: FirErrorType, data: D): CompositeTransformResult<FirType> {
-        return transformType(errorType, data)
-    }
-
-    open fun transformImplicitType(implicitType: FirImplicitType, data: D): CompositeTransformResult<FirType> {
-        return transformType(implicitType, data)
-    }
-
-    open fun transformTypeWithNullability(typeWithNullability: FirTypeWithNullability, data: D): CompositeTransformResult<FirType> {
-        return transformType(typeWithNullability, data)
-    }
-
-    open fun transformDynamicType(dynamicType: FirDynamicType, data: D): CompositeTransformResult<FirType> {
-        return transformTypeWithNullability(dynamicType, data)
-    }
-
-    open fun transformFunctionType(functionType: FirFunctionType, data: D): CompositeTransformResult<FirType> {
-        return transformTypeWithNullability(functionType, data)
-    }
-
-    open fun transformResolvedType(resolvedType: FirResolvedType, data: D): CompositeTransformResult<FirType> {
-        return transformTypeWithNullability(resolvedType, data)
-    }
-
-    open fun transformResolvedFunctionType(resolvedFunctionType: FirResolvedFunctionType, data: D): CompositeTransformResult<FirType> {
-        return transformResolvedType(resolvedFunctionType, data)
-    }
-
-    open fun transformUserType(userType: FirUserType, data: D): CompositeTransformResult<FirType> {
-        return transformTypeWithNullability(userType, data)
-    }
-
     open fun transformTypeProjection(typeProjection: FirTypeProjection, data: D): CompositeTransformResult<FirTypeProjection> {
         return transformElement(typeProjection, data)
     }
@@ -346,6 +314,46 @@ abstract class FirTransformer<in D> : FirVisitor<CompositeTransformResult<FirEle
 
     open fun transformTypeProjectionWithVariance(typeProjectionWithVariance: FirTypeProjectionWithVariance, data: D): CompositeTransformResult<FirTypeProjection> {
         return transformTypeProjection(typeProjectionWithVariance, data)
+    }
+
+    open fun transformTypeRef(typeRef: FirTypeRef, data: D): CompositeTransformResult<FirTypeRef> {
+        return transformElement(typeRef, data)
+    }
+
+    open fun transformDelegatedTypeRef(delegatedTypeRef: FirDelegatedTypeRef, data: D): CompositeTransformResult<FirTypeRef> {
+        return transformTypeRef(delegatedTypeRef, data)
+    }
+
+    open fun transformErrorTypeRef(errorTypeRef: FirErrorTypeRef, data: D): CompositeTransformResult<FirTypeRef> {
+        return transformTypeRef(errorTypeRef, data)
+    }
+
+    open fun transformImplicitTypeRef(implicitTypeRef: FirImplicitTypeRef, data: D): CompositeTransformResult<FirTypeRef> {
+        return transformTypeRef(implicitTypeRef, data)
+    }
+
+    open fun transformTypeRefWithNullability(typeRefWithNullability: FirTypeRefWithNullability, data: D): CompositeTransformResult<FirTypeRef> {
+        return transformTypeRef(typeRefWithNullability, data)
+    }
+
+    open fun transformDynamicTypeRef(dynamicTypeRef: FirDynamicTypeRef, data: D): CompositeTransformResult<FirTypeRef> {
+        return transformTypeRefWithNullability(dynamicTypeRef, data)
+    }
+
+    open fun transformFunctionTypeRef(functionTypeRef: FirFunctionTypeRef, data: D): CompositeTransformResult<FirTypeRef> {
+        return transformTypeRefWithNullability(functionTypeRef, data)
+    }
+
+    open fun transformResolvedTypeRef(resolvedTypeRef: FirResolvedTypeRef, data: D): CompositeTransformResult<FirTypeRef> {
+        return transformTypeRefWithNullability(resolvedTypeRef, data)
+    }
+
+    open fun transformResolvedFunctionTypeRef(resolvedFunctionTypeRef: FirResolvedFunctionTypeRef, data: D): CompositeTransformResult<FirTypeRef> {
+        return transformResolvedTypeRef(resolvedFunctionTypeRef, data)
+    }
+
+    open fun transformUserTypeRef(userTypeRef: FirUserTypeRef, data: D): CompositeTransformResult<FirTypeRef> {
+        return transformTypeRefWithNullability(userTypeRef, data)
     }
 
     open fun <E : FirElement> transformWhenBranch(whenBranch: E, data: D): CompositeTransformResult<E> {
@@ -412,6 +420,10 @@ abstract class FirTransformer<in D> : FirVisitor<CompositeTransformResult<FirEle
         return transformClass(klass, data)
     }
 
+    final override fun visitClassReferenceExpression(classReferenceExpression: FirClassReferenceExpression, data: D): CompositeTransformResult<FirElement> {
+        return transformClassReferenceExpression(classReferenceExpression, data)
+    }
+
     final override fun visitComponentCall(componentCall: FirComponentCall, data: D): CompositeTransformResult<FirElement> {
         return transformComponentCall(componentCall, data)
     }
@@ -444,16 +456,16 @@ abstract class FirTransformer<in D> : FirVisitor<CompositeTransformResult<FirEle
         return transformDelegatedConstructorCall(delegatedConstructorCall, data)
     }
 
-    final override fun visitDelegatedType(delegatedType: FirDelegatedType, data: D): CompositeTransformResult<FirElement> {
-        return transformDelegatedType(delegatedType, data)
+    final override fun visitDelegatedTypeRef(delegatedTypeRef: FirDelegatedTypeRef, data: D): CompositeTransformResult<FirElement> {
+        return transformDelegatedTypeRef(delegatedTypeRef, data)
     }
 
     final override fun visitDoWhileLoop(doWhileLoop: FirDoWhileLoop, data: D): CompositeTransformResult<FirElement> {
         return transformDoWhileLoop(doWhileLoop, data)
     }
 
-    final override fun visitDynamicType(dynamicType: FirDynamicType, data: D): CompositeTransformResult<FirElement> {
-        return transformDynamicType(dynamicType, data)
+    final override fun visitDynamicTypeRef(dynamicTypeRef: FirDynamicTypeRef, data: D): CompositeTransformResult<FirElement> {
+        return transformDynamicTypeRef(dynamicTypeRef, data)
     }
 
     final override fun visitEnumEntry(enumEntry: FirEnumEntry, data: D): CompositeTransformResult<FirElement> {
@@ -468,8 +480,8 @@ abstract class FirTransformer<in D> : FirVisitor<CompositeTransformResult<FirEle
         return transformErrorExpression(errorExpression, data)
     }
 
-    final override fun visitErrorType(errorType: FirErrorType, data: D): CompositeTransformResult<FirElement> {
-        return transformErrorType(errorType, data)
+    final override fun visitErrorTypeRef(errorTypeRef: FirErrorTypeRef, data: D): CompositeTransformResult<FirElement> {
+        return transformErrorTypeRef(errorTypeRef, data)
     }
 
     final override fun visitExpression(expression: FirExpression, data: D): CompositeTransformResult<FirElement> {
@@ -488,16 +500,16 @@ abstract class FirTransformer<in D> : FirVisitor<CompositeTransformResult<FirEle
         return transformFunctionCall(functionCall, data)
     }
 
-    final override fun visitFunctionType(functionType: FirFunctionType, data: D): CompositeTransformResult<FirElement> {
-        return transformFunctionType(functionType, data)
+    final override fun visitFunctionTypeRef(functionTypeRef: FirFunctionTypeRef, data: D): CompositeTransformResult<FirElement> {
+        return transformFunctionTypeRef(functionTypeRef, data)
     }
 
     final override fun visitGetClassCall(getClassCall: FirGetClassCall, data: D): CompositeTransformResult<FirElement> {
         return transformGetClassCall(getClassCall, data)
     }
 
-    final override fun visitImplicitType(implicitType: FirImplicitType, data: D): CompositeTransformResult<FirElement> {
-        return transformImplicitType(implicitType, data)
+    final override fun visitImplicitTypeRef(implicitTypeRef: FirImplicitTypeRef, data: D): CompositeTransformResult<FirElement> {
+        return transformImplicitTypeRef(implicitTypeRef, data)
     }
 
     final override fun visitImport(import: FirImport, data: D): CompositeTransformResult<FirElement> {
@@ -580,20 +592,24 @@ abstract class FirTransformer<in D> : FirVisitor<CompositeTransformResult<FirEle
         return transformRegularClass(regularClass, data)
     }
 
+    final override fun visitResolvedCallableReference(resolvedCallableReference: FirResolvedCallableReference, data: D): CompositeTransformResult<FirElement> {
+        return transformResolvedCallableReference(resolvedCallableReference, data)
+    }
+
     final override fun visitResolvedDeclarationStatus(resolvedDeclarationStatus: FirResolvedDeclarationStatus, data: D): CompositeTransformResult<FirElement> {
         return transformResolvedDeclarationStatus(resolvedDeclarationStatus, data)
     }
 
-    final override fun visitResolvedFunctionType(resolvedFunctionType: FirResolvedFunctionType, data: D): CompositeTransformResult<FirElement> {
-        return transformResolvedFunctionType(resolvedFunctionType, data)
+    final override fun visitResolvedFunctionTypeRef(resolvedFunctionTypeRef: FirResolvedFunctionTypeRef, data: D): CompositeTransformResult<FirElement> {
+        return transformResolvedFunctionTypeRef(resolvedFunctionTypeRef, data)
     }
 
     final override fun visitResolvedImport(resolvedImport: FirResolvedImport, data: D): CompositeTransformResult<FirElement> {
         return transformResolvedImport(resolvedImport, data)
     }
 
-    final override fun visitResolvedType(resolvedType: FirResolvedType, data: D): CompositeTransformResult<FirElement> {
-        return transformResolvedType(resolvedType, data)
+    final override fun visitResolvedTypeRef(resolvedTypeRef: FirResolvedTypeRef, data: D): CompositeTransformResult<FirElement> {
+        return transformResolvedTypeRef(resolvedTypeRef, data)
     }
 
     final override fun visitReturnExpression(returnExpression: FirReturnExpression, data: D): CompositeTransformResult<FirElement> {
@@ -628,10 +644,6 @@ abstract class FirTransformer<in D> : FirVisitor<CompositeTransformResult<FirEle
         return transformTryExpression(tryExpression, data)
     }
 
-    final override fun visitType(type: FirType, data: D): CompositeTransformResult<FirElement> {
-        return transformType(type, data)
-    }
-
     final override fun visitTypeAlias(typeAlias: FirTypeAlias, data: D): CompositeTransformResult<FirElement> {
         return transformTypeAlias(typeAlias, data)
     }
@@ -652,16 +664,20 @@ abstract class FirTransformer<in D> : FirVisitor<CompositeTransformResult<FirEle
         return transformTypeProjectionWithVariance(typeProjectionWithVariance, data)
     }
 
-    final override fun visitTypeWithNullability(typeWithNullability: FirTypeWithNullability, data: D): CompositeTransformResult<FirElement> {
-        return transformTypeWithNullability(typeWithNullability, data)
+    final override fun visitTypeRef(typeRef: FirTypeRef, data: D): CompositeTransformResult<FirElement> {
+        return transformTypeRef(typeRef, data)
+    }
+
+    final override fun visitTypeRefWithNullability(typeRefWithNullability: FirTypeRefWithNullability, data: D): CompositeTransformResult<FirElement> {
+        return transformTypeRefWithNullability(typeRefWithNullability, data)
     }
 
     final override fun visitTypedDeclaration(typedDeclaration: FirTypedDeclaration, data: D): CompositeTransformResult<FirElement> {
         return transformTypedDeclaration(typedDeclaration, data)
     }
 
-    final override fun visitUserType(userType: FirUserType, data: D): CompositeTransformResult<FirElement> {
-        return transformUserType(userType, data)
+    final override fun visitUserTypeRef(userTypeRef: FirUserTypeRef, data: D): CompositeTransformResult<FirElement> {
+        return transformUserTypeRef(userTypeRef, data)
     }
 
     final override fun visitValueParameter(valueParameter: FirValueParameter, data: D): CompositeTransformResult<FirElement> {

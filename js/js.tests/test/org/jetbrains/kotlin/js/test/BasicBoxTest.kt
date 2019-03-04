@@ -382,7 +382,7 @@ abstract class BasicBoxTest(
             }
         }
         for ((sourceFile, data) in incrementalData.translatedFiles) {
-            sourceToTranslationUnit[sourceFile] = TranslationUnit.BinaryAst(data.binaryAst)
+            sourceToTranslationUnit[sourceFile] = TranslationUnit.BinaryAst(data.binaryAst, data.inlineData)
         }
         val translationUnits = sourceToTranslationUnit.keys
                 .sortedBy { it.canonicalPath }
@@ -461,7 +461,7 @@ abstract class BasicBoxTest(
         runtime: JsIrTestRuntime,
         isMainModule: Boolean
     ) {
-        val translator = K2JSTranslator(config)
+        val translator = K2JSTranslator(config, false)
         val translationResult = translator.translateUnits(ExceptionThrowingReporter, units, mainCallParameters)
 
         if (translationResult !is TranslationResult.Success) {

@@ -1,5 +1,4 @@
 // WITH_RUNTIME
-// IS_APPLICABLE: false
 
 class Foo {
     fun foo(i: Int) {}
@@ -7,6 +6,7 @@ class Foo {
     fun test(f: Foo) {
         val f = Foo()<caret>
         f.foo(1)
+        f.foo(2)
         bar(2, this)
     }
 }

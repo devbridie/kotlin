@@ -507,7 +507,7 @@ open class CInteropProcess : DefaultTask() {
             addArgIfNotNull("-def", defFile.canonicalPath)
             addArgIfNotNull("-pkg", packageName)
 
-            addFileArgs("-h", headers)
+            addFileArgs("-header", headers)
 
             compilerOpts.forEach {
                 addArg("-copt", it)
@@ -518,7 +518,7 @@ open class CInteropProcess : DefaultTask() {
             }
 
             libraries.files.filterExternalKlibs(project).forEach { library ->
-                addArg("-l", library.absolutePath)
+                addArg("-library", library.absolutePath)
             }
 
             addArgs("-copt", allHeadersDirs.map { "-I${it.absolutePath}" })

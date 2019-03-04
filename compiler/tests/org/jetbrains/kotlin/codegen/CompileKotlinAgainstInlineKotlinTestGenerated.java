@@ -640,9 +640,29 @@ public class CompileKotlinAgainstInlineKotlinTestGenerated extends AbstractCompi
             runTest("compiler/testData/codegen/boxInline/assert/jvmAssertInlineLambda.kt");
         }
 
+        @TestMetadata("jvmCompanion.kt")
+        public void testJvmCompanion() throws Exception {
+            runTest("compiler/testData/codegen/boxInline/assert/jvmCompanion.kt");
+        }
+
         @TestMetadata("jvmCrossinlineLambda.kt")
         public void testJvmCrossinlineLambda() throws Exception {
             runTest("compiler/testData/codegen/boxInline/assert/jvmCrossinlineLambda.kt");
+        }
+
+        @TestMetadata("jvmCrossinlineLambda2.kt")
+        public void testJvmCrossinlineLambda2() throws Exception {
+            runTest("compiler/testData/codegen/boxInline/assert/jvmCrossinlineLambda2.kt");
+        }
+
+        @TestMetadata("jvmCrossinlineLambdaDeclarationSite.kt")
+        public void testJvmCrossinlineLambdaDeclarationSite() throws Exception {
+            runTest("compiler/testData/codegen/boxInline/assert/jvmCrossinlineLambdaDeclarationSite.kt");
+        }
+
+        @TestMetadata("jvmDoubleInline.kt")
+        public void testJvmDoubleInline() throws Exception {
+            runTest("compiler/testData/codegen/boxInline/assert/jvmDoubleInline.kt");
         }
     }
 
@@ -1867,6 +1887,37 @@ public class CompileKotlinAgainstInlineKotlinTestGenerated extends AbstractCompi
         @TestMetadata("inlineFromOtherPackage.kt")
         public void testInlineFromOtherPackage() throws Exception {
             runTest("compiler/testData/codegen/boxInline/multifileClasses/inlineFromOtherPackage.kt");
+        }
+    }
+
+    @TestMetadata("compiler/testData/codegen/boxInline/multiplatform")
+    @TestDataPath("$PROJECT_ROOT")
+    @RunWith(JUnit3RunnerWithInners.class)
+    public static class Multiplatform extends AbstractCompileKotlinAgainstInlineKotlinTest {
+        private void runTest(String testDataFilePath) throws Exception {
+            KotlinTestUtils.runTest(this::doTest, TargetBackend.ANY, testDataFilePath);
+        }
+
+        public void testAllFilesPresentInMultiplatform() throws Exception {
+            KotlinTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("compiler/testData/codegen/boxInline/multiplatform"), Pattern.compile("^(.+)\\.kt$"), TargetBackend.ANY, true);
+        }
+
+        @TestMetadata("compiler/testData/codegen/boxInline/multiplatform/defaultArguments")
+        @TestDataPath("$PROJECT_ROOT")
+        @RunWith(JUnit3RunnerWithInners.class)
+        public static class DefaultArguments extends AbstractCompileKotlinAgainstInlineKotlinTest {
+            private void runTest(String testDataFilePath) throws Exception {
+                KotlinTestUtils.runTest(this::doTest, TargetBackend.ANY, testDataFilePath);
+            }
+
+            public void testAllFilesPresentInDefaultArguments() throws Exception {
+                KotlinTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("compiler/testData/codegen/boxInline/multiplatform/defaultArguments"), Pattern.compile("^(.+)\\.kt$"), TargetBackend.ANY, true);
+            }
+
+            @TestMetadata("receiversAndParametersInLambda.kt")
+            public void testReceiversAndParametersInLambda() throws Exception {
+                runTest("compiler/testData/codegen/boxInline/multiplatform/defaultArguments/receiversAndParametersInLambda.kt");
+            }
         }
     }
 

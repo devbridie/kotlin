@@ -8,6 +8,7 @@ package org.jetbrains.kotlin.fir
 import org.jetbrains.kotlin.fir.visitors.FirVisitor
 import org.jetbrains.kotlin.name.Name
 
+@BaseTransformedType
 interface FirNamedReference : FirReference {
     val name: Name
 

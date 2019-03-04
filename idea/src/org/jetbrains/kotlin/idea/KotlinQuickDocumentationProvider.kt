@@ -24,6 +24,8 @@ import com.intellij.lang.documentation.DocumentationMarkup.*
 import com.intellij.lang.java.JavaDocumentationProvider
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.project.DumbService
+import com.intellij.openapi.project.IndexNotReadyException
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
@@ -45,6 +47,7 @@ import org.jetbrains.kotlin.idea.kdoc.KDocRenderer.appendKDocSection
 import org.jetbrains.kotlin.idea.kdoc.KDocTemplate.DescriptionBodyTemplate
 import org.jetbrains.kotlin.idea.references.mainReference
 import org.jetbrains.kotlin.idea.resolve.frontendService
+import org.jetbrains.kotlin.idea.util.isRunningInCidrIde
 import org.jetbrains.kotlin.js.resolve.diagnostics.findPsi
 import org.jetbrains.kotlin.kdoc.psi.api.KDoc
 import org.jetbrains.kotlin.kdoc.psi.impl.KDocSection
@@ -67,10 +70,10 @@ import org.jetbrains.kotlin.utils.addToStdlib.safeAs
 
 private object DocumentationURLs {
     const val LATE_INITIALIZED_PROPERTIES_AND_VARIABLES_URL =
-        "http://kotlinlang.org/docs/reference/properties.html#late-initialized-properties-and-variables"
+        "https://kotlinlang.org/docs/reference/properties.html#late-initialized-properties-and-variables"
 
     const val TAIL_RECURSIVE_FUNCTIONS_URL =
-        "http://kotlinlang.org/docs/reference/functions.html#tail-recursive-functions"
+        "https://kotlinlang.org/docs/reference/functions.html#tail-recursive-functions"
 }
 
 class HtmlClassifierNamePolicy(val base: ClassifierNamePolicy) : ClassifierNamePolicy {
@@ -247,11 +250,22 @@ class KotlinQuickDocumentationProvider : AbstractDocumentationProvider() {
         }
 
         private fun getText(element: PsiElement, originalElement: PsiElement?, quickNavigation: Boolean): String? {
+            // INRE is already fixed in 191 in CtrlMouseHandler.updateOnPsiChanges(), so after abandoning 183 branch try-catch can be removed.
+            // BUNCH: 183
+            return try {
+                getTextImpl(element, originalElement, quickNavigation)
+            } catch (_: IndexNotReadyException) {
+                DumbService.getInstance(element.project).showDumbModeNotification("Element information is not available during index update")
+                null
+            }
+        }
+
+        private fun getTextImpl(element: PsiElement, originalElement: PsiElement?, quickNavigation: Boolean): String? {
             if (element is PsiWhiteSpace) {
                 val itElement = findElementWithText(originalElement, "it")
                 val itReference = itElement?.getParentOfType<KtNameReferenceExpression>(false)
                 if (itReference != null) {
-                    return getText(itReference, originalElement, quickNavigation)
+                    return getTextImpl(itReference, originalElement, quickNavigation)
                 }
             }
 
@@ -260,7 +274,7 @@ class KotlinQuickDocumentationProvider : AbstractDocumentationProvider() {
                 if (declaration is KtCallableDeclaration && declaration.receiverTypeReference == element) {
                     val thisElement = findElementWithText(originalElement, "this")
                     if (thisElement != null) {
-                        return getText(declaration, originalElement, quickNavigation)
+                        return getTextImpl(declaration, originalElement, quickNavigation)
                     }
                 }
             }
@@ -496,6 +510,8 @@ class KotlinQuickDocumentationProvider : AbstractDocumentationProvider() {
             element: PsiElement,
             originalElement: PsiElement?
         ): String? {
+            if (isRunningInCidrIde) return null // no Java support in CIDR
+
             val originalInfo = JavaDocumentationProvider().getQuickNavigateInfo(element, originalElement)
             if (originalInfo != null) {
                 val renderedDecl = constant { DESCRIPTOR_RENDERER.withOptions { withDefinedIn = false } }.render(declarationDescriptor)

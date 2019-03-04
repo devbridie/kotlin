@@ -24,7 +24,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementVisitor
 import com.intellij.psi.PsiReference
 import com.intellij.psi.search.GlobalSearchScope
-import com.intellij.psi.search.PsiSearchHelper
+import com.intellij.psi.search.PsiSearchHelper.SearchCostResult
 import com.intellij.psi.search.PsiSearchHelper.SearchCostResult.*
 import com.intellij.psi.search.SearchScope
 import com.intellij.psi.search.searches.DefinitionsScopedSearch
@@ -61,6 +61,7 @@ import org.jetbrains.kotlin.idea.search.usagesSearch.getAccessorNames
 import org.jetbrains.kotlin.idea.search.usagesSearch.getClassNameForCompanionObject
 import org.jetbrains.kotlin.idea.stubindex.KotlinSourceFilterScope
 import org.jetbrains.kotlin.idea.util.ProjectRootsUtil
+import org.jetbrains.kotlin.idea.util.compat.psiSearchHelperInstance
 import org.jetbrains.kotlin.idea.util.hasActualsFor
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.*
@@ -109,7 +110,34 @@ class UnusedSymbolInspection : AbstractKotlinInspection() {
                 }
                 else -> return false
             }
-            return lightElement != null && javaInspection.isEntryPoint(lightElement)
+
+            if (lightElement == null) return false
+
+            if (isCheapEnoughToSearchUsages(declaration) == TOO_MANY_OCCURRENCES) return false
+
+            return javaInspection.isEntryPoint(lightElement)
+        }
+
+        private fun isCheapEnoughToSearchUsages(declaration: KtNamedDeclaration): SearchCostResult {
+            val project = declaration.project
+            val psiSearchHelper = psiSearchHelperInstance(project)
+
+            val useScope = psiSearchHelper.getUseScope(declaration)
+            if (useScope is GlobalSearchScope) {
+                var zeroOccurrences = true
+                for (name in listOf(declaration.name) + declaration.getAccessorNames() + listOfNotNull(declaration.getClassNameForCompanionObject())) {
+                    if (name == null) continue
+                    when (psiSearchHelper.isCheapEnoughToSearchConsideringOperators(name, useScope, null, null)) {
+                        ZERO_OCCURRENCES -> {
+                        } // go on, check other names
+                        FEW_OCCURRENCES -> zeroOccurrences = false
+                        TOO_MANY_OCCURRENCES -> return TOO_MANY_OCCURRENCES // searching usages is too expensive; behave like it is used
+                    }
+                }
+
+                if (zeroOccurrences) return ZERO_OCCURRENCES
+            }
+            return FEW_OCCURRENCES
         }
 
         private fun KtProperty.isSerializationImplicitlyUsedField(): Boolean {
@@ -221,20 +249,15 @@ class UnusedSymbolInspection : AbstractKotlinInspection() {
 
     private fun hasNonTrivialUsages(declaration: KtNamedDeclaration, descriptor: DeclarationDescriptor? = null): Boolean {
         val project = declaration.project
-        val psiSearchHelper = PsiSearchHelper.SERVICE.getInstance(project)
+        val psiSearchHelper = psiSearchHelperInstance(project)
 
-        val useScope = declaration.useScope
+        val useScope = psiSearchHelper.getUseScope(declaration)
         val restrictedScope = if (useScope is GlobalSearchScope) {
-            var zeroOccurrences = true
-
-            for (name in listOf(declaration.name) + declaration.getAccessorNames() + listOfNotNull(declaration.getClassNameForCompanionObject())) {
-                if (name == null) continue
-                when (psiSearchHelper.isCheapEnoughToSearchConsideringOperators(name, useScope, null, null)) {
-                    ZERO_OCCURRENCES -> {
-                    } // go on, check other names
-                    FEW_OCCURRENCES -> zeroOccurrences = false
-                    TOO_MANY_OCCURRENCES -> return true // searching usages is too expensive; behave like it is used
-                }
+            val enoughToSearchUsages = isCheapEnoughToSearchUsages(declaration)
+            val zeroOccurrences = when (enoughToSearchUsages) {
+                ZERO_OCCURRENCES -> true
+                FEW_OCCURRENCES -> false
+                TOO_MANY_OCCURRENCES -> return true // searching usages is too expensive; behave like it is used
             }
 
             if (zeroOccurrences && !declaration.hasActualModifier()) {

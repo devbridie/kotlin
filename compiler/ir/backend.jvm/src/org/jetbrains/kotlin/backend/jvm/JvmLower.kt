@@ -48,7 +48,8 @@ internal val jvmPhases = namedIrFilePhase(
             moveCompanionObjectFieldsPhase then
             constPhase then
             propertiesToFieldsPhase then
-            propertiesPhase then
+            makePropertiesPhase(JvmLoweredDeclarationOrigin.SYNTHETIC_METHOD_FOR_PROPERTY_ANNOTATIONS) then
+            renameFieldsPhase then
             annotationPhase then
 
             jvmDefaultArgumentStubPhase then
@@ -81,6 +82,7 @@ internal val jvmPhases = namedIrFilePhase(
             tailrecPhase then
             toArrayPhase then
             jvmTypeOperatorLoweringPhase then
+            flattenStringConcatenationPhase then
             jvmBuiltinOptimizationLoweringPhase then
 
             makePatchParentsPhase(3)

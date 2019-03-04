@@ -19,17 +19,27 @@ package org.jetbrains.kotlin.idea.search
 import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.fileTypes.FileTypeRegistry
 import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.FileIndexFacade
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
+import com.intellij.psi.impl.cache.impl.id.IdIndex
+import com.intellij.psi.impl.cache.impl.id.IdIndexEntry
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.LocalSearchScope
 import com.intellij.psi.search.PsiSearchHelper
 import com.intellij.psi.search.SearchScope
 import com.intellij.psi.search.searches.ReferencesSearch
+import com.intellij.util.Processor
+import com.intellij.util.indexing.FileBasedIndex
 import org.jetbrains.kotlin.idea.KotlinFileType
+import org.jetbrains.kotlin.idea.util.compat.psiSearchHelperInstance
+import org.jetbrains.kotlin.idea.util.application.runReadAction
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.psi.KtFile
+import org.jetbrains.kotlin.script.findScriptDefinition
 import org.jetbrains.kotlin.types.expressions.OperatorConventions
 
 infix fun SearchScope.and(otherScope: SearchScope): SearchScope = intersectWith(otherScope)
@@ -56,7 +66,7 @@ fun PsiFile.fileScope(): GlobalSearchScope = GlobalSearchScope.fileScope(this)
 
 fun GlobalSearchScope.restrictByFileType(fileType: FileType) = GlobalSearchScope.getScopeRestrictedByFileTypes(this, fileType)
 
-fun SearchScope.restrictByFileType(fileType: FileType) = when (this) {
+fun SearchScope.restrictByFileType(fileType: FileType): SearchScope = when (this) {
     is GlobalSearchScope -> restrictByFileType(fileType)
     is LocalSearchScope -> {
         val elements = scope.filter { it.containingFile.fileType == fileType }
@@ -79,8 +89,7 @@ fun SearchScope.excludeFileTypes(vararg fileTypes: FileType): SearchScope {
     return if (this is GlobalSearchScope) {
         val includedFileTypes = FileTypeRegistry.getInstance().registeredFileTypes.filter { it !in fileTypes }.toTypedArray()
         GlobalSearchScope.getScopeRestrictedByFileTypes(this, *includedFileTypes)
-    }
-    else {
+    } else {
         this as LocalSearchScope
         val filteredElements = scope.filter { it.containingFile.fileType !in fileTypes }
         if (filteredElements.isNotEmpty())
@@ -94,7 +103,7 @@ fun SearchScope.excludeFileTypes(vararg fileTypes: FileType): SearchScope {
 fun ReferencesSearch.SearchParameters.effectiveSearchScope(element: PsiElement): SearchScope {
     if (element == elementToSearch) return effectiveSearchScope
     if (isIgnoreAccessScope) return scopeDeterminedByUser
-    val accessScope = PsiSearchHelper.SERVICE.getInstance(element.project).getUseScope(element)
+    val accessScope = psiSearchHelperInstance(element.project).getUseScope(element)
     return scopeDeterminedByUser.intersectWith(accessScope)
 }
 
@@ -108,7 +117,36 @@ fun PsiSearchHelper.isCheapEnoughToSearchConsideringOperators(
     fileToIgnoreOccurrencesIn: PsiFile?,
     progress: ProgressIndicator?
 ): PsiSearchHelper.SearchCostResult {
-    if (OperatorConventions.isConventionName(Name.identifier(name))) return PsiSearchHelper.SearchCostResult.TOO_MANY_OCCURRENCES
+    if (OperatorConventions.isConventionName(Name.identifier(name))) {
+        return PsiSearchHelper.SearchCostResult.TOO_MANY_OCCURRENCES
+    }
+
+    if (!isCheapToSearchUsagesInScripts(scope.restrictToKotlinSources(), name)) {
+        return PsiSearchHelper.SearchCostResult.TOO_MANY_OCCURRENCES
+    }
 
     return isCheapEnoughToSearch(name, scope, fileToIgnoreOccurrencesIn, progress)
+}
+
+private fun isCheapToSearchUsagesInScripts(scope: GlobalSearchScope, name: String): Boolean {
+    val project = scope.project ?: return true
+
+    var scriptsCount = 0
+    val processor = object : Processor<VirtualFile> {
+        override fun process(file: VirtualFile): Boolean {
+            ProgressManager.checkCanceled()
+            if (findScriptDefinition(file, project) == null) return true
+            return scriptsCount++ < 3
+        }
+    }
+
+    val index = FileIndexFacade.getInstance(project)
+    return runReadAction {
+        FileBasedIndex.getInstance().processFilesContainingAllKeys(
+            IdIndex.NAME,
+            listOf(IdIndexEntry(name, true)),
+            scope,
+            null,
+            { file -> !index.shouldBeFound(scope, file) || processor.process(file) })
+    }
 }

@@ -7,6 +7,7 @@ package org.jetbrains.kotlin.ir.backend.js.utils
 
 import org.jetbrains.kotlin.backend.common.ir.isTopLevel
 import org.jetbrains.kotlin.descriptors.*
+import org.jetbrains.kotlin.ir.backend.js.JsLoweredDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.expressions.IrLoop
 import org.jetbrains.kotlin.ir.symbols.IrSymbol
@@ -106,6 +107,10 @@ class SimpleNameGenerator : NameGenerator {
                 return@getOrPut context.currentScope.declareName(jsName)
             }
 
+            if (declaration is IrSimpleFunction && declaration.origin == JsLoweredDeclarationOrigin.BRIDGE_TO_EXTERNAL_FUNCTION) {
+                return@getOrPut context.staticContext.rootScope.declareName(declaration.name.identifier)
+            }
+
             if (declaration.isEffectivelyExternal()) {
                 // TODO: descriptors are still used here due to the corresponding declaration doesn't have enough information yet
                 val descriptorName = when (descriptor) {
@@ -117,8 +122,12 @@ class SimpleNameGenerator : NameGenerator {
                 if (declaration is IrConstructor) return@getOrPut getNameForDeclaration(declaration.parentAsClass, context)
 
                 if (declaration is IrClass && declaration.parent is IrClass) {
-                    val parentName = getNameForDeclaration(declaration.parentAsClass, context).ident
-                    return@getOrPut context.currentScope.declareFreshName(parentName + "$" + descriptorName.identifier)
+                    val parentName = getNameForDeclaration(declaration.parentAsClass, context)
+                    if (declaration.isCompanion) {
+                        // External companions are class references
+                        return@getOrPut parentName
+                    }
+                    return@getOrPut context.currentScope.declareFreshName(parentName.ident + "$" + descriptorName.identifier)
                 }
                 return@getOrPut context.staticContext.rootScope.declareName(descriptorName.identifier)
             }

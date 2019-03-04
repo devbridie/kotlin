@@ -13,34 +13,46 @@ import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.declarations.FirNamedFunction
 import org.jetbrains.kotlin.fir.declarations.FirValueParameter
 import org.jetbrains.kotlin.fir.expressions.FirBlock
+import org.jetbrains.kotlin.fir.symbols.impl.FirFunctionSymbol
 import org.jetbrains.kotlin.fir.transformInplace
 import org.jetbrains.kotlin.fir.transformSingle
-import org.jetbrains.kotlin.fir.types.FirType
+import org.jetbrains.kotlin.fir.types.FirTypeRef
 import org.jetbrains.kotlin.fir.visitors.FirTransformer
 import org.jetbrains.kotlin.name.Name
 
-class FirMemberFunctionImpl(
-    session: FirSession,
-    psi: PsiElement?,
-    name: Name,
-    visibility: Visibility,
-    modality: Modality?,
-    isExpect: Boolean,
-    isActual: Boolean,
-    isOverride: Boolean,
-    isOperator: Boolean,
-    isInfix: Boolean,
-    isInline: Boolean,
-    isTailRec: Boolean,
-    isExternal: Boolean,
-    isSuspend: Boolean,
-    receiverType: FirType?,
-    returnType: FirType
-) : FirAbstractCallableMember(
-    session, psi, name, visibility, modality,
-    isExpect, isActual, isOverride, receiverType, returnType
-), FirNamedFunction, FirModifiableFunction {
-    init {
+class FirMemberFunctionImpl : FirAbstractCallableMember, FirNamedFunction, FirModifiableFunction {
+
+    constructor(
+        session: FirSession,
+        psi: PsiElement?,
+        symbol: FirFunctionSymbol,
+        name: Name,
+        receiverTypeRef: FirTypeRef?,
+        returnTypeRef: FirTypeRef
+    ) : super(session, psi, symbol, name, receiverTypeRef, returnTypeRef)
+
+    constructor(
+        session: FirSession,
+        psi: PsiElement?,
+        symbol: FirFunctionSymbol,
+        name: Name,
+        visibility: Visibility,
+        modality: Modality?,
+        isExpect: Boolean,
+        isActual: Boolean,
+        isOverride: Boolean,
+        isOperator: Boolean,
+        isInfix: Boolean,
+        isInline: Boolean,
+        isTailRec: Boolean,
+        isExternal: Boolean,
+        isSuspend: Boolean,
+        receiverTypeRef: FirTypeRef?,
+        returnTypeRef: FirTypeRef
+    ) : super(
+        session, psi, symbol, name, visibility, modality,
+        isExpect, isActual, isOverride, receiverTypeRef, returnTypeRef
+    ) {
         status.isOperator = isOperator
         status.isInfix = isInfix
         status.isInline = isInline

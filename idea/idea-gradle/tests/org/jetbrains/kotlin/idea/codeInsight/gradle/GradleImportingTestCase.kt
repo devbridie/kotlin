@@ -36,7 +36,6 @@ import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.testFramework.IdeaTestUtil
-import com.intellij.testFramework.TestLoggerFactory
 import com.intellij.util.PathUtil
 import com.intellij.util.containers.ContainerUtil
 import junit.framework.TestCase
@@ -44,7 +43,7 @@ import org.gradle.util.GradleVersion
 import org.gradle.wrapper.GradleWrapperMain
 import org.intellij.lang.annotations.Language
 import org.jetbrains.annotations.NonNls
-import org.jetbrains.kotlin.gradle.KotlinSdkCreationChecker
+import org.jetbrains.kotlin.idea.test.KotlinSdkCreationChecker
 import org.jetbrains.kotlin.idea.test.PluginTestCaseBase
 import org.jetbrains.kotlin.test.KotlinTestUtils
 import org.jetbrains.plugins.gradle.settings.DistributionType
@@ -63,8 +62,8 @@ import java.io.IOException
 import java.io.StringWriter
 import java.net.URISyntaxException
 import java.util.*
-import com.intellij.openapi.diagnostic.Logger
 import org.junit.AfterClass
+import org.junit.Assume.assumeTrue
 
 // part of org.jetbrains.plugins.gradle.importing.GradleImportingTestCase
 @RunWith(value = Parameterized::class)
@@ -91,9 +90,12 @@ abstract class GradleImportingTestCase : ExternalSystemImportingTestCase() {
     private lateinit var myProjectSettings: GradleProjectSettings
     private lateinit var myJdkHome: String
 
+    open fun isApplicableTest(): Boolean = true
+
     override fun setUp() {
         myJdkHome = IdeaTestUtil.requireRealJdkHome()
         super.setUp()
+        assumeTrue(isApplicableTest())
         assumeThat(gradleVersion, versionMatcherRule.matcher)
         runWrite {
             ProjectJdkTable.getInstance().findJdk(GRADLE_JDK_NAME)?.let {
@@ -172,7 +174,7 @@ abstract class GradleImportingTestCase : ExternalSystemImportingTestCase() {
                 allprojects {
                     repositories {
                         maven {
-                            url 'http://maven.labs.intellij.net/repo1'
+                            url 'https://maven.labs.intellij.net/repo1'
                         }
                     }
                 }
@@ -218,7 +220,7 @@ abstract class GradleImportingTestCase : ExternalSystemImportingTestCase() {
         return File(baseDir, getTestName(true).substringBefore("_"))
     }
 
-    protected fun configureByFiles(): List<VirtualFile> {
+    protected open fun configureByFiles(): List<VirtualFile> {
         val rootDir = testDataDirectory()
         assert(rootDir.exists()) { "Directory ${rootDir.path} doesn't exist" }
 
@@ -285,21 +287,18 @@ abstract class GradleImportingTestCase : ExternalSystemImportingTestCase() {
             return File(PathUtil.getJarPathForClass(GradleWrapperMain::class.java))
         }
 
-        private var persistedLoggerFactory : Logger.Factory? = null
+        private var logSaver: GradleImportingTestLogSaver? = null
 
         @JvmStatic
         @BeforeClass
         fun setLoggerFactory() {
-            persistedLoggerFactory = Logger.getFactory()
-            Logger.setFactory(TestLoggerFactory::class.java)
+            logSaver = GradleImportingTestLogSaver()
         }
 
         @JvmStatic
         @AfterClass
         fun restoreLoggerFactory() {
-            if (persistedLoggerFactory != null) {
-                Logger.setFactory(persistedLoggerFactory)
-            }
+            logSaver?.restore()
         }
     }
 }

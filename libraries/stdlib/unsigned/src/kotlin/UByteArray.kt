@@ -37,9 +37,18 @@ internal constructor(@PublishedApi internal val storage: ByteArray) : Collection
         override fun nextUByte() = if (index < array.size) array[index++].toUByte() else throw NoSuchElementException(index.toString())
     }
 
-    override fun contains(element: UByte): Boolean = storage.contains(element.toByte())
+    override fun contains(element: UByte): Boolean {
+        // TODO: Eliminate this check after KT-30016 gets fixed.
+        // Currently JS BE does not generate special bridge method for this method.
+        if ((element as Any?) !is UByte) return false
 
-    override fun containsAll(elements: Collection<UByte>): Boolean = elements.all { storage.contains(it.toByte()) }
+        return storage.contains(element.toByte())
+    }
+
+    override fun containsAll(elements: Collection<UByte>): Boolean {
+        if ((elements as Collection<Any?>).any { it as? UByte == null }) return false
+        return elements.all { storage.contains(it.toByte()) }
+    }
 
     override fun isEmpty(): Boolean = this.storage.size == 0
 }

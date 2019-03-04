@@ -66,6 +66,7 @@ configurations {
     coroutinesExperimentalMigrationTestCompile.extendsFrom(coroutinesExperimentalTestCompile)
     longRunningTestCompile.extendsFrom(testCompile)
     builtins
+    compileOnly.extendsFrom(builtins)
 }
 
 dependencies {
@@ -88,7 +89,7 @@ jar {
     dependsOn(configurations.builtins)
     manifestAttributes(manifest, project, 'Main' /*true*/)
     from {
-        zipTree(configurations.builtins.asPath)
+        zipTree(configurations.builtins.singleFile)
     }
     from sourceSets.experimental.output
     from sourceSets.coroutinesExperimental.output
@@ -136,9 +137,10 @@ task modularJar(type: Jar) {
 
 artifacts {
     archives sourcesJar
-    archives javadocJar
     archives modularJar
 }
+
+javadocJar()
 
 dist {
     dependsOn distMavenSources
@@ -161,8 +163,6 @@ task dexMethodCount(type: DexMethodCount) {
 check.dependsOn(dexMethodCount)
 
 compileKotlin {
-    dependsOn(configurations.builtins)
-    classpath += configurations.builtins
     kotlinOptions {
         freeCompilerArgs = [
                 "-version",

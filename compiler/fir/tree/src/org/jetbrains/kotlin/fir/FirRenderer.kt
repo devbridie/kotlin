@@ -13,9 +13,11 @@ import org.jetbrains.kotlin.fir.expressions.*
 import org.jetbrains.kotlin.fir.expressions.impl.*
 import org.jetbrains.kotlin.fir.symbols.ConeClassLikeSymbol
 import org.jetbrains.kotlin.fir.symbols.ConeSymbol
+import org.jetbrains.kotlin.fir.symbols.impl.FirFunctionSymbol
+import org.jetbrains.kotlin.fir.symbols.impl.FirPropertySymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirTypeParameterSymbol
 import org.jetbrains.kotlin.fir.types.*
-import org.jetbrains.kotlin.fir.types.impl.FirImplicitBuiltinType
+import org.jetbrains.kotlin.fir.types.impl.FirImplicitBuiltinTypeRef
 import org.jetbrains.kotlin.fir.visitors.FirVisitorVoid
 import org.jetbrains.kotlin.name.SpecialNames
 import org.jetbrains.kotlin.types.Variance
@@ -94,7 +96,7 @@ class FirRenderer(builder: StringBuilder) : FirVisitorVoid() {
 
     override fun visitCallableMember(callableMember: FirCallableMember) {
         visitMemberDeclaration(callableMember)
-        val receiverType = callableMember.receiverType
+        val receiverType = callableMember.receiverTypeRef
         if (receiverType != null) {
             print(" ")
             receiverType.accept(this)
@@ -106,7 +108,7 @@ class FirRenderer(builder: StringBuilder) : FirVisitorVoid() {
             print(if (callableMember.isVar) "(var)" else "(val)")
         }
         print(": ")
-        callableMember.returnType.accept(this)
+        callableMember.returnTypeRef.accept(this)
     }
 
     private fun Visibility.asString() =
@@ -221,9 +223,9 @@ class FirRenderer(builder: StringBuilder) : FirVisitorVoid() {
 
     override fun visitRegularClass(regularClass: FirRegularClass) {
         visitMemberDeclaration(regularClass)
-        if (regularClass.superTypes.isNotEmpty()) {
+        if (regularClass.superTypeRefs.isNotEmpty()) {
             print(" : ")
-            regularClass.superTypes.renderSeparated()
+            regularClass.superTypeRefs.renderSeparated()
         }
         regularClass.renderDeclarations()
     }
@@ -231,7 +233,7 @@ class FirRenderer(builder: StringBuilder) : FirVisitorVoid() {
     override fun visitAnonymousObject(anonymousObject: FirAnonymousObject) {
         anonymousObject.annotations.renderAnnotations()
         print("object : ")
-        anonymousObject.superTypes.renderSeparated()
+        anonymousObject.superTypeRefs.renderSeparated()
         anonymousObject.renderDeclarations()
     }
 
@@ -239,7 +241,7 @@ class FirRenderer(builder: StringBuilder) : FirVisitorVoid() {
         variable.annotations.renderAnnotations()
         visitNamedDeclaration(variable)
         print(": ")
-        variable.returnType.accept(this)
+        variable.returnTypeRef.accept(this)
         variable.initializer?.let {
             print(" = ")
             it.accept(this)
@@ -300,7 +302,7 @@ class FirRenderer(builder: StringBuilder) : FirVisitorVoid() {
         print(if (propertyAccessor.isGetter) "get" else "set")
         propertyAccessor.valueParameters.renderParameters()
         print(": ")
-        propertyAccessor.returnType.accept(this)
+        propertyAccessor.returnTypeRef.accept(this)
         propertyAccessor.body?.accept(this)
     }
 
@@ -311,7 +313,7 @@ class FirRenderer(builder: StringBuilder) : FirVisitorVoid() {
             print("${label.name}@")
         }
         print("function ")
-        val receiverType = anonymousFunction.receiverType
+        val receiverType = anonymousFunction.receiverTypeRef
         if (receiverType != null) {
             print(" ")
             receiverType.accept(this)
@@ -320,7 +322,7 @@ class FirRenderer(builder: StringBuilder) : FirVisitorVoid() {
         print("<anonymous>")
         anonymousFunction.valueParameters.renderParameters()
         print(": ")
-        anonymousFunction.returnType.accept(this)
+        anonymousFunction.returnTypeRef.accept(this)
         anonymousFunction.body?.accept(this)
     }
 
@@ -354,7 +356,7 @@ class FirRenderer(builder: StringBuilder) : FirVisitorVoid() {
         typeAlias.annotations.renderAnnotations()
         visitMemberDeclaration(typeAlias)
         print(" = ")
-        typeAlias.expandedType.accept(this)
+        typeAlias.expandedTypeRef.accept(this)
         println()
     }
 
@@ -389,7 +391,7 @@ class FirRenderer(builder: StringBuilder) : FirVisitorVoid() {
         if (valueParameter.name != SpecialNames.NO_NAME_PROVIDED) {
             print(valueParameter.name.toString() + ": ")
         }
-        valueParameter.returnType.accept(this)
+        valueParameter.returnTypeRef.accept(this)
         valueParameter.defaultValue?.let {
             print(" = ")
             it.accept(this)
@@ -541,7 +543,7 @@ class FirRenderer(builder: StringBuilder) : FirVisitorVoid() {
             print(it.name)
             print(":")
         }
-        annotationCall.annotationType.accept(this)
+        annotationCall.annotationTypeRef.accept(this)
         visitCall(annotationCall)
         if (annotationCall.useSiteTarget == AnnotationUseSiteTarget.FILE) {
             println()
@@ -556,54 +558,54 @@ class FirRenderer(builder: StringBuilder) : FirVisitorVoid() {
         } else if (delegatedConstructorCall.isThis) {
             print(": this<")
         }
-        delegatedConstructorCall.constructedType.accept(this)
+        delegatedConstructorCall.constructedTypeRef.accept(this)
         print(">")
         visitCall(delegatedConstructorCall)
     }
 
-    override fun visitType(type: FirType) {
-        type.annotations.renderAnnotations()
-        visitElement(type)
+    override fun visitTypeRef(typeRef: FirTypeRef) {
+        typeRef.annotations.renderAnnotations()
+        visitElement(typeRef)
     }
 
-    override fun visitDelegatedType(delegatedType: FirDelegatedType) {
-        delegatedType.type.accept(this)
+    override fun visitDelegatedTypeRef(delegatedTypeRef: FirDelegatedTypeRef) {
+        delegatedTypeRef.typeRef.accept(this)
         print(" by ")
-        delegatedType.delegate?.accept(this)
+        delegatedTypeRef.delegate?.accept(this)
     }
 
-    override fun visitErrorType(errorType: FirErrorType) {
-        visitType(errorType)
-        print("<ERROR TYPE: ${errorType.reason}>")
+    override fun visitErrorTypeRef(errorTypeRef: FirErrorTypeRef) {
+        visitTypeRef(errorTypeRef)
+        print("<ERROR TYPE: ${errorTypeRef.reason}>")
     }
 
-    override fun visitImplicitType(implicitType: FirImplicitType) {
-        print(if (implicitType is FirImplicitBuiltinType) "kotlin.${implicitType.name}" else "<implicit>")
+    override fun visitImplicitTypeRef(implicitTypeRef: FirImplicitTypeRef) {
+        print(if (implicitTypeRef is FirImplicitBuiltinTypeRef) "${implicitTypeRef.id}" else "<implicit>")
     }
 
-    override fun visitTypeWithNullability(typeWithNullability: FirTypeWithNullability) {
-        if (typeWithNullability.isNullable) {
+    override fun visitTypeRefWithNullability(typeRefWithNullability: FirTypeRefWithNullability) {
+        if (typeRefWithNullability.isMarkedNullable) {
             print("?")
         }
     }
 
-    override fun visitDynamicType(dynamicType: FirDynamicType) {
-        dynamicType.annotations.renderAnnotations()
+    override fun visitDynamicTypeRef(dynamicTypeRef: FirDynamicTypeRef) {
+        dynamicTypeRef.annotations.renderAnnotations()
         print("<dynamic>")
-        visitTypeWithNullability(dynamicType)
+        visitTypeRefWithNullability(dynamicTypeRef)
     }
 
-    override fun visitFunctionType(functionType: FirFunctionType) {
+    override fun visitFunctionTypeRef(functionTypeRef: FirFunctionTypeRef) {
         print("( ")
-        functionType.receiverType?.let {
+        functionTypeRef.receiverTypeRef?.let {
             it.accept(this)
             print(".")
         }
-        functionType.valueParameters.renderParameters()
+        functionTypeRef.valueParameters.renderParameters()
         print(" -> ")
-        functionType.returnType.accept(this)
+        functionTypeRef.returnTypeRef.accept(this)
         print(" )")
-        visitTypeWithNullability(functionType)
+        visitTypeRefWithNullability(functionTypeRef)
     }
 
     private fun ConeSymbol.asString(): String {
@@ -617,6 +619,7 @@ class FirRenderer(builder: StringBuilder) : FirVisitorVoid() {
     private fun ConeKotlinType.asString(): String {
         return when (this) {
             is ConeKotlinErrorType -> "error: $reason"
+            is ConeClassErrorType -> "class error: $reason"
             is ConeClassLikeType -> {
                 val sb = StringBuilder()
                 sb.append(symbol.classId.asString())
@@ -650,21 +653,32 @@ class FirRenderer(builder: StringBuilder) : FirVisitorVoid() {
                     append(returnType.asString())
                 }
             }
+            is ConeFlexibleType -> {
+                buildString {
+                    append("ft<")
+                    append(lowerBound.asString())
+                    append(", ")
+                    append(upperBound.asString())
+                    append(">")
+                }
+            }
         }
     }
 
-    override fun visitResolvedType(resolvedType: FirResolvedType) {
-        resolvedType.annotations.renderAnnotations()
+    override fun visitResolvedTypeRef(resolvedTypeRef: FirResolvedTypeRef) {
+        resolvedTypeRef.annotations.renderAnnotations()
         print("R|")
-        val coneType = resolvedType.type
+        val coneType = resolvedTypeRef.type
         print(coneType.asString())
         print("|")
-        visitTypeWithNullability(resolvedType)
+        if (coneType !is ConeKotlinErrorType && coneType !is ConeClassErrorType) {
+            print(coneType.nullability.suffix)
+        }
     }
 
-    override fun visitUserType(userType: FirUserType) {
-        userType.annotations.renderAnnotations()
-        for ((index, qualifier) in userType.qualifier.withIndex()) {
+    override fun visitUserTypeRef(userTypeRef: FirUserTypeRef) {
+        userTypeRef.annotations.renderAnnotations()
+        for ((index, qualifier) in userTypeRef.qualifier.withIndex()) {
             if (index != 0) {
                 print(".")
             }
@@ -675,7 +689,7 @@ class FirRenderer(builder: StringBuilder) : FirVisitorVoid() {
                 print(">")
             }
         }
-        visitTypeWithNullability(userType)
+        visitTypeRefWithNullability(userTypeRef)
     }
 
     override fun visitTypeProjection(typeProjection: FirTypeProjection) {
@@ -684,7 +698,7 @@ class FirRenderer(builder: StringBuilder) : FirVisitorVoid() {
 
     override fun visitTypeProjectionWithVariance(typeProjectionWithVariance: FirTypeProjectionWithVariance) {
         typeProjectionWithVariance.variance.renderVariance()
-        typeProjectionWithVariance.type.accept(this)
+        typeProjectionWithVariance.typeRef.accept(this)
     }
 
     override fun visitStarProjection(starProjection: FirStarProjection) {
@@ -693,6 +707,31 @@ class FirRenderer(builder: StringBuilder) : FirVisitorVoid() {
 
     override fun visitNamedReference(namedReference: FirNamedReference) {
         print("${namedReference.name}#")
+    }
+
+    override fun visitResolvedCallableReference(resolvedCallableReference: FirResolvedCallableReference) {
+        print("R|")
+        val isFakeOverride = (resolvedCallableReference.callableSymbol as? FirFunctionSymbol)?.isFakeOverride == true
+
+        if (isFakeOverride) {
+            print("FakeOverride<")
+        }
+        val symbol = resolvedCallableReference.callableSymbol
+        print(symbol.callableId)
+        if (isFakeOverride) {
+            when (symbol) {
+                is FirFunctionSymbol -> {
+                    print(": ")
+                    symbol.fir.returnTypeRef.accept(this)
+                }
+                is FirPropertySymbol -> {
+                    print(": ")
+                    symbol.fir.returnTypeRef.accept(this)
+                }
+            }
+            print(">")
+        }
+        print("|")
     }
 
     override fun visitThisReference(thisReference: FirThisReference) {
@@ -707,7 +746,7 @@ class FirRenderer(builder: StringBuilder) : FirVisitorVoid() {
 
     override fun visitSuperReference(superReference: FirSuperReference) {
         print("super<")
-        superReference.superType.accept(this)
+        superReference.superTypeRef.accept(this)
         print(">")
     }
 
@@ -777,7 +816,7 @@ class FirRenderer(builder: StringBuilder) : FirVisitorVoid() {
         print(operatorCall.operation.operator)
         if (operatorCall is FirTypeOperatorCall) {
             print("/")
-            operatorCall.type.accept(this)
+            operatorCall.typeRef.accept(this)
         }
         visitCall(operatorCall)
     }
@@ -800,6 +839,14 @@ class FirRenderer(builder: StringBuilder) : FirVisitorVoid() {
         getClassCall.annotations.renderAnnotations()
         print("<getClass>")
         visitCall(getClassCall)
+    }
+
+    override fun visitClassReferenceExpression(classReferenceExpression: FirClassReferenceExpression) {
+        classReferenceExpression.annotations.renderAnnotations()
+        print("<getClass>")
+        print("(")
+        classReferenceExpression.typeRef.accept(this)
+        print(")")
     }
 
     override fun visitArrayOfCall(arrayOfCall: FirArrayOfCall) {

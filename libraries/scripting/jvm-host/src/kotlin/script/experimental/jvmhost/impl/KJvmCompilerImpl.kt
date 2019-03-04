@@ -27,7 +27,6 @@ import org.jetbrains.kotlin.cli.jvm.compiler.*
 import org.jetbrains.kotlin.cli.jvm.config.JvmClasspathRoot
 import org.jetbrains.kotlin.cli.jvm.config.addJvmClasspathRoots
 import org.jetbrains.kotlin.cli.jvm.config.jvmClasspathRoots
-import org.jetbrains.kotlin.cli.jvm.plugins.PluginCliParser
 import org.jetbrains.kotlin.codegen.ClassBuilderFactories
 import org.jetbrains.kotlin.codegen.CompilationErrorHandler
 import org.jetbrains.kotlin.codegen.KotlinCodegenFacade
@@ -208,6 +207,9 @@ class KJvmCompilerImpl(val hostConfiguration: ScriptingHostConfiguration) : KJvm
             setupCommonArguments(baseArguments)
 
             setupJvmSpecificArguments(baseArguments)
+
+            // default value differs from the argument'ss default (see #KT-29405 and #KT-29319)
+            put(JVMConfigurationKeys.JVM_TARGET, JvmTarget.JVM_1_8)
 
             val jdkHomeFromConfigurations = scriptCompilationConfiguration.getNoDefault(ScriptCompilationConfiguration.jvm.jdkHome)
                 ?: hostConfiguration[ScriptingHostConfiguration.jvm.jdkHome]

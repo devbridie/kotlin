@@ -13,6 +13,7 @@ import org.jetbrains.kotlin.ir.backend.js.utils.getJsQualifier
 import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.declarations.impl.IrExternalPackageFragmentImpl
 import org.jetbrains.kotlin.ir.symbols.IrExternalPackageFragmentSymbol
+import org.jetbrains.kotlin.ir.util.isClass
 import org.jetbrains.kotlin.ir.util.isEffectivelyExternal
 import org.jetbrains.kotlin.ir.util.transformFlat
 import org.jetbrains.kotlin.name.FqName
@@ -38,7 +39,8 @@ fun moveBodilessDeclarationsToSeparatePlace(context: JsIrBackendContext, module:
         "Short",
         "Int",
         "Float",
-        "Double"
+        "Double",
+        "Function"
     ).map { Name.identifier(it) }.toSet()
 
     fun isBuiltInClass(declaration: IrDeclaration): Boolean =
@@ -66,7 +68,7 @@ fun moveBodilessDeclarationsToSeparatePlace(context: JsIrBackendContext, module:
             externalClasses.flatMap { collectExternalClasses(it, true) }
 
         return if (includeCurrentLevel)
-            externalClasses + nestedExternalClasses
+            externalClasses.filter { it.isClass } + nestedExternalClasses
         else
             nestedExternalClasses
     }

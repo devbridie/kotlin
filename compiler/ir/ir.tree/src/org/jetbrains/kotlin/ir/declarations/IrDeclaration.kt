@@ -28,9 +28,13 @@ interface IrSymbolOwner : IrElement {
     val symbol: IrSymbol
 }
 
-interface IrDeclaration : IrStatement, IrAnnotationContainer {
+interface IrMetadataSourceOwner : IrElement {
+    val metadata: MetadataSource?
+}
+
+interface IrDeclaration : IrStatement, IrAnnotationContainer, IrMetadataSourceOwner {
     val descriptor: DeclarationDescriptor
-    val origin: IrDeclarationOrigin
+    var origin: IrDeclarationOrigin
 
     var parent: IrDeclarationParent
 

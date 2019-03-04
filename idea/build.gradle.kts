@@ -11,6 +11,7 @@ repositories {
 
 dependencies {
     testRuntime(intellijDep())
+    testRuntime(intellijRuntimeAnnotations())
 
     compile(kotlinStdlib("jdk8"))
     compileOnly(project(":kotlin-reflect-api"))
@@ -36,6 +37,8 @@ dependencies {
     compile(project(":j2k"))
     compile(project(":idea:formatter"))
     compile(project(":idea:fir-view"))
+    compile(project(":compiler:fir:resolve"))
+    compile(project(":compiler:fir:java"))
     compile(project(":idea:idea-core"))
     compile(project(":idea:ide-common"))
     compile(project(":idea:idea-jps-common"))
@@ -44,6 +47,7 @@ dependencies {
     compile(project(":plugins:uast-kotlin-idea"))
     compile(project(":kotlin-script-util")) { isTransitive = false }
     compile(project(":kotlin-scripting-intellij"))
+    compile(project(":compiler:backend.jvm")) // Do not delete, for Pill
 
     compile(commonDep("org.jetbrains.kotlinx", "kotlinx-coroutines-core")) { isTransitive = false }
 
@@ -205,6 +209,4 @@ projectTest(taskName = "performanceTest") {
 
 testsJar {}
 
-classesDirsArtifact()
 configureFormInstrumentation()
-

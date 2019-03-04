@@ -217,6 +217,10 @@ public class KotlinTypeMapper {
         return jvmTarget;
     }
 
+    public LanguageVersionSettings getLanguageVersionSettings() {
+        return languageVersionSettings;
+    }
+
     @NotNull
     public Type mapOwner(@NotNull DeclarationDescriptor descriptor) {
         return mapOwner(descriptor, true);
@@ -1832,6 +1836,14 @@ public class KotlinTypeMapper {
             if (!visited.add(descriptor)) return null;
             if (descriptor.getContainingDeclaration() != constructorOwner) return next;
         }
+    }
+
+    @NotNull
+    public Method mapSyntheticMethodForPropertyAnnotations(@NotNull PropertyDescriptor descriptor) {
+        ReceiverParameterDescriptor receiver = descriptor.getExtensionReceiverParameter();
+        String name = JvmAbi.getSyntheticMethodNameForAnnotatedProperty(descriptor.getName());
+        String desc = receiver == null ? "()V" : "(" + mapType(receiver.getType()) + ")V";
+        return new Method(name, desc);
     }
 
     @NotNull

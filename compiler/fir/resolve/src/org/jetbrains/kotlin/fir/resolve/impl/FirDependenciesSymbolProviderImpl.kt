@@ -10,11 +10,17 @@ import org.jetbrains.kotlin.fir.dependenciesWithoutSelf
 import org.jetbrains.kotlin.fir.resolve.AbstractFirSymbolProvider
 import org.jetbrains.kotlin.fir.resolve.FirSymbolProvider
 import org.jetbrains.kotlin.fir.service
-import org.jetbrains.kotlin.fir.symbols.ConeSymbol
+import org.jetbrains.kotlin.fir.symbols.CallableId
+import org.jetbrains.kotlin.fir.symbols.ConeCallableSymbol
+import org.jetbrains.kotlin.fir.symbols.ConeClassLikeSymbol
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 
 class FirDependenciesSymbolProviderImpl(val session: FirSession) : AbstractFirSymbolProvider() {
+    override fun getCallableSymbols(callableId: CallableId): List<ConeCallableSymbol> {
+        // TODO
+        return emptyList()
+    }
 
     private val dependencyProviders by lazy {
         val moduleInfo = session.moduleInfo ?: return@lazy emptyList()
@@ -23,10 +29,10 @@ class FirDependenciesSymbolProviderImpl(val session: FirSession) : AbstractFirSy
         }.toList()
     }
 
-    override fun getSymbolByFqName(classId: ClassId): ConeSymbol? {
+    override fun getClassLikeSymbolByFqName(classId: ClassId): ConeClassLikeSymbol? {
         return classCache.lookupCacheOrCalculate(classId) {
             for (provider in dependencyProviders) {
-                provider.getSymbolByFqName(classId)?.let {
+                provider.getClassLikeSymbolByFqName(classId)?.let {
                     return@lookupCacheOrCalculate it
                 }
             }

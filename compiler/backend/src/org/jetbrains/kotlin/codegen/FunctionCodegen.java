@@ -784,7 +784,7 @@ public class FunctionCodegen {
         }
 
         generateLocalVariablesForParameters(mv,
-                                            jvmMethodSignature,
+                                            jvmMethodSignature, functionDescriptor,
                                             thisType, methodBegin, methodEnd, functionDescriptor.getValueParameters(),
                                             destructuredParametersForSuspendLambda,
                                             AsmUtil.isStaticMethod(ownerKind, functionDescriptor), typeMapper, shiftForDestructuringVariables
@@ -794,6 +794,7 @@ public class FunctionCodegen {
     public static void generateLocalVariablesForParameters(
             @NotNull MethodVisitor mv,
             @NotNull JvmMethodSignature jvmMethodSignature,
+            @NotNull FunctionDescriptor functionDescriptor,
             @Nullable Type thisType,
             @NotNull Label methodBegin,
             @NotNull Label methodEnd,
@@ -802,13 +803,15 @@ public class FunctionCodegen {
             KotlinTypeMapper typeMapper
     ) {
         generateLocalVariablesForParameters(
-                mv, jvmMethodSignature, thisType, methodBegin, methodEnd, valueParameters, Collections.emptyList(), isStatic, typeMapper,
+                mv, jvmMethodSignature, functionDescriptor,
+                thisType, methodBegin, methodEnd, valueParameters, Collections.emptyList(), isStatic, typeMapper,
                 0);
     }
 
     private static void generateLocalVariablesForParameters(
             @NotNull MethodVisitor mv,
             @NotNull JvmMethodSignature jvmMethodSignature,
+            @NotNull FunctionDescriptor functionDescriptor,
             @Nullable Type thisType,
             @NotNull Label methodBegin,
             @NotNull Label methodEnd,
@@ -840,12 +843,16 @@ public class FunctionCodegen {
 
             if (kind == JvmMethodParameterKind.VALUE) {
                 ValueParameterDescriptor parameter = valueParameterIterator.next();
-                String nameForDestructuredParameter = ValueParameterDescriptorImpl.getNameForDestructuredParameterOrNull(parameter);
+                String nameForDestructuredParameter = VariableAsmNameManglingUtils.getNameForDestructuredParameterOrNull(parameter);
 
                 parameterName =
                         nameForDestructuredParameter == null
                         ? computeParameterName(i, parameter)
                         : nameForDestructuredParameter;
+            }
+            else if (kind == JvmMethodParameterKind.RECEIVER) {
+                parameterName = AsmUtil.getNameForReceiverParameter(
+                        functionDescriptor, typeMapper.getBindingContext(), typeMapper.getLanguageVersionSettings());
             }
             else {
                 String lowercaseKind = kind.name().toLowerCase();
@@ -895,7 +902,7 @@ public class FunctionCodegen {
             List<ValueParameterDescriptor> destructuredParametersForSuspendLambda
     ) {
         for (ValueParameterDescriptor parameter : destructuredParametersForSuspendLambda) {
-            String nameForDestructuredParameter = ValueParameterDescriptorImpl.getNameForDestructuredParameterOrNull(parameter);
+            String nameForDestructuredParameter = VariableAsmNameManglingUtils.getNameForDestructuredParameterOrNull(parameter);
             if (nameForDestructuredParameter == null) continue;
 
             Type type = typeMapper.mapType(parameter.getType());
@@ -1208,10 +1215,6 @@ public class FunctionCodegen {
                 getThrownExceptions(functionDescriptor, typeMapper)
         );
 
-        // Only method annotations are copied to the $default method. Parameter annotations are not copied until there are valid use cases;
-        // enum constructors have two additional synthetic parameters which somewhat complicate this task
-        AnnotationCodegen.forMethod(mv, memberCodegen, state).genAnnotations(functionDescriptor, defaultMethod.getReturnType());
-
         if (!state.getClassBuilderMode().generateBodies) {
             if (this.owner instanceof MultifileClassFacadeContext)
                 endVisit(mv, "default method delegation", getSourceFromDescriptor(functionDescriptor));
@@ -1357,7 +1360,7 @@ public class FunctionCodegen {
             @NotNull List<ValueParameterDescriptor> valueParameters,
             boolean isStatic
     ) {
-        FrameMap frameMap = new FrameMap();
+        FrameMap frameMap = new FrameMapWithExpectActualSupport(state.getModule());
         if (!isStatic) {
             frameMap.enterTemp(OBJECT_TYPE);
         }
