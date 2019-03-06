@@ -12,16 +12,29 @@ import org.jetbrains.kotlin.psi.KtPsiFactory
 class ConvertJavaCollectionConstructorToFunctionCall : SelfTargetingIntention<KtNameReferenceExpression>(
     KtNameReferenceExpression::class.java, "Convert Java collection call to function call"
 ) {
+
+    private val functionMap = hashMapOf(
+        "ArrayList" to "arrayListOf",
+        "HashMap" to "hashMapOf",
+        "HashSet" to "hashSetOf"
+    )
+
     override fun isApplicableTo(element: KtNameReferenceExpression, caretOffset: Int): Boolean {
+
+        var list: LinkedHashMap<Int, Int> = LinkedHashMap()
 
         val name = element.text ?: return false
 
-        return name == "ArrayList"
+        return functionMap.containsKey(name)
     }
 
     override fun applyTo(element: KtNameReferenceExpression, editor: Editor?) {
 
-        val arrayListOfCall = KtPsiFactory(element).createIdentifier("arrayListOf")
+        val name = element.text ?: return
+
+        val functionName = functionMap[name] ?: return
+
+        val arrayListOfCall = KtPsiFactory(element).createIdentifier(functionName)
 
         element.replace(arrayListOfCall)
     }

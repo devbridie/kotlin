@@ -5423,9 +5423,29 @@ public class IntentionTestGenerated extends AbstractIntentionTest {
             KotlinTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("idea/testData/intentions/convertJavaCollectionConstructorToFunctionCall"), Pattern.compile("^([\\w\\-_]+)\\.(kt|kts)$"), TargetBackend.ANY, true);
         }
 
+        @TestMetadata("keepLinkedHashMapCall.kt")
+        public void testKeepLinkedHashMapCall() throws Exception {
+            runTest("idea/testData/intentions/convertJavaCollectionConstructorToFunctionCall/keepLinkedHashMapCall.kt");
+        }
+
+        @TestMetadata("keepLinkedHashSetCall.kt")
+        public void testKeepLinkedHashSetCall() throws Exception {
+            runTest("idea/testData/intentions/convertJavaCollectionConstructorToFunctionCall/keepLinkedHashSetCall.kt");
+        }
+
         @TestMetadata("replaceArrayListCall.kt")
         public void testReplaceArrayListCall() throws Exception {
             runTest("idea/testData/intentions/convertJavaCollectionConstructorToFunctionCall/replaceArrayListCall.kt");
+        }
+
+        @TestMetadata("replaceHashMapCall.kt")
+        public void testReplaceHashMapCall() throws Exception {
+            runTest("idea/testData/intentions/convertJavaCollectionConstructorToFunctionCall/replaceHashMapCall.kt");
+        }
+
+        @TestMetadata("replaceHashSetCall.kt")
+        public void testReplaceHashSetCall() throws Exception {
+            runTest("idea/testData/intentions/convertJavaCollectionConstructorToFunctionCall/replaceHashSetCall.kt");
         }
     }
 
