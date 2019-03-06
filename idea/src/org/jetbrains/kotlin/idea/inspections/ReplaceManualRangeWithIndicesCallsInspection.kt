@@ -12,12 +12,14 @@ import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElementVisitor
 import org.jetbrains.kotlin.idea.inspections.collections.isCalling
+import org.jetbrains.kotlin.idea.intentions.getArguments
+import org.jetbrains.kotlin.idea.intentions.getCallableDescriptor
+import org.jetbrains.kotlin.idea.intentions.isSizeOrLength
+import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.name.FqName
-import org.jetbrains.kotlin.psi.KtCallExpression
-import org.jetbrains.kotlin.psi.KtPsiFactory
-import org.jetbrains.kotlin.psi.callExpressionVisitor
+import org.jetbrains.kotlin.psi.*
 
-class ReplaceManualRangeWithIndicesCalls : AbstractPrimitiveRangeToInspection() {
+class ReplaceManualRangeWithIndicesCallsInspection : AbstractPrimitiveRangeToInspection() {
     override fun visitRangeToExpression(expression: KtExpression, holder: ProblemsHolder) {
         if (expression.getArguments()?.second?.deparenthesize()?.isSizeMinusOne() != true) return
 
@@ -27,6 +29,9 @@ class ReplaceManualRangeWithIndicesCalls : AbstractPrimitiveRangeToInspection() 
             ProblemHighlightType.GENERIC_ERROR_OR_WARNING,
             ReplaceManualRangeWithIndicesCallQuickFix()
         )
+
+
+
 
         /*
         if (expression.getArguments()?.second?.deparenthesize()?.isMinusOne() != true) return
@@ -38,22 +43,33 @@ class ReplaceManualRangeWithIndicesCalls : AbstractPrimitiveRangeToInspection() 
             ReplaceWithUntilQuickFix()
         )*/
     }
+    private fun KtExpression.isSizeMinusOne(): Boolean {
+        if (this !is KtBinaryExpression) return false
+        if (operationToken != KtTokens.MINUS) return false
+
+        //    isCalling(FqName("kotlin.collections.size"))
+        //    val leftValue = right?.
+        val leftValue = left?.isSizeOrLength() ?: return false
+        val constantValue = right?.constantValueOrNull()
+        val rightValue = (constantValue?.value as? Number)?.toInt() ?: return false
+        return rightValue == 1 && leftValue
+    }
 
 }
 
 class ReplaceManualRangeWithIndicesCallQuickFix: LocalQuickFix {
     override fun getName() = "Replace with indices"
 
-    override fun getFamilyName = name
+    override fun getFamilyName() = name
 
     override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
         val element = descriptor.psiElement as KtExpression
         val args = element.getArguments() ?: return
+        val first = (args.first as? KtCallExpression)?.calleeExpression ?: return
         element.replace(
             KtPsiFactory(element).createExpressionByPattern(
                 "$0.indices",
-                args.first ?: return,
-                (args.second?.deparenthesize() as? KtBinaryExpression)?.left ?: return
+                first
             )
 
         )
@@ -77,15 +93,10 @@ class ReplaceManualRangeWithIndicesCallQuickFix: LocalQuickFix {
     }*/
 }
 
-private fun KtExpression.isSizeMinusOne(): Boolean {
-    if (this !is KtBinaryExpression) return false
-    if (operationToken != KtTokens.MINUS) return false
 
 
-    val constantValue = right?.constantValueOrNull()
-    val rightValue = (constantValue?.value as? Number)?.toInt() ?: return false
-    return rightValue == 1
-}
+private fun KtExpression.deparenthesize() = KtPsiUtil.safeDeparenthesize(this)
+
 
 /*
 class ReplaceCollectionCountWithSizeQuickFix : LocalQuickFix {
