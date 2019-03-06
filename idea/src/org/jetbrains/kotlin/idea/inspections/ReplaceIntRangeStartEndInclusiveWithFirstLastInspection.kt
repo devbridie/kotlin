@@ -19,15 +19,15 @@ import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameOrNull
 class ReplaceIntRangeStartEndInclusiveWithFirstLastInspection : AbstractKotlinInspection() {
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
         return dotQualifiedExpressionVisitor { expression ->
-            val fName: FqName? = expression.GetFunctionName()
+            val fName: FqName = expression.getFunctionName() ?: return
 
-            if (fName != null && fName.isStart()) {
+            if (fName.isStart()) {
                 holder.registerProblem(
                     expression,
                     "Could be replaced with `first`",
                     ReplaceIntRangeStartWithFirstQuickFix()
                 )
-            } else if (fName != null && fName.isEndInclusive()) {
+            } else if (fName.isEndInclusive()) {
                 holder.registerProblem(
                     expression,
                     "Could be replaced with `last`",
@@ -38,7 +38,7 @@ class ReplaceIntRangeStartEndInclusiveWithFirstLastInspection : AbstractKotlinIn
     }
 }
 
-private fun KtDotQualifiedExpression.GetFunctionName(): FqName? {
+private fun KtDotQualifiedExpression.getFunctionName(): FqName? {
     val context = this.analyze()
     return this.getResolvedCall(context)?.resultingDescriptor?.fqNameOrNull()
 }
@@ -58,7 +58,7 @@ class ReplaceIntRangeStartWithFirstQuickFix : LocalQuickFix {
 
     override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
         val element = descriptor.psiElement as KtDotQualifiedExpression
-        element.selectorExpression!!.replace(KtPsiFactory(element).createExpression("first"))
+        element.selectorExpression.replace(KtPsiFactory(element).createExpression("first"))
     }
 }
 
