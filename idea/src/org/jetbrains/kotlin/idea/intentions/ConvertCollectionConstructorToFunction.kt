@@ -9,7 +9,7 @@ import com.intellij.openapi.editor.Editor
 import org.jetbrains.kotlin.psi.KtNameReferenceExpression
 import org.jetbrains.kotlin.psi.KtPsiFactory
 
-class ConvertJavaCollectionConstructorToFunctionCall : SelfTargetingIntention<KtNameReferenceExpression>(
+class ConvertCollectionConstructorToFunction : SelfTargetingIntention<KtNameReferenceExpression>(
     KtNameReferenceExpression::class.java, "Convert Java collection call to function call"
 ) {
 
@@ -20,8 +20,6 @@ class ConvertJavaCollectionConstructorToFunctionCall : SelfTargetingIntention<Kt
     )
 
     override fun isApplicableTo(element: KtNameReferenceExpression, caretOffset: Int): Boolean {
-
-        var list: LinkedHashMap<Int, Int> = LinkedHashMap()
 
         val name = element.text ?: return false
 

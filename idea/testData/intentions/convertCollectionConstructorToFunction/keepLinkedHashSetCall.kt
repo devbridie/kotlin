@@ -1,5 +1,6 @@
 // WITH_RUNTIME
-// PROBLEM: none
+// IS_APPLICABLE: false
+
 import java.util.LinkedHashSet
 
 fun foo() {
