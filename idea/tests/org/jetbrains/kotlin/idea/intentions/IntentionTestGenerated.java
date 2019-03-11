@@ -4915,11 +4915,6 @@ public class IntentionTestGenerated extends AbstractIntentionTest {
             KotlinTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("idea/testData/intentions/convertCollectionConstructorToFunction"), Pattern.compile("^([\\w\\-_]+)\\.(kt|kts)$"), TargetBackend.ANY, true);
         }
 
-        @TestMetadata("keepLinkedHashSetCall.kt")
-        public void testKeepLinkedHashSetCall() throws Exception {
-            runTest("idea/testData/intentions/convertCollectionConstructorToFunction/keepLinkedHashSetCall.kt");
-        }
-
         @TestMetadata("replaceArrayListCall.kt")
         public void testReplaceArrayListCall() throws Exception {
             runTest("idea/testData/intentions/convertCollectionConstructorToFunction/replaceArrayListCall.kt");
@@ -4933,6 +4928,11 @@ public class IntentionTestGenerated extends AbstractIntentionTest {
         @TestMetadata("replaceHashSetCall.kt")
         public void testReplaceHashSetCall() throws Exception {
             runTest("idea/testData/intentions/convertCollectionConstructorToFunction/replaceHashSetCall.kt");
+        }
+
+        @TestMetadata("replaceLinkedHashSetCall.kt")
+        public void testReplaceLinkedHashSetCall() throws Exception {
+            runTest("idea/testData/intentions/convertCollectionConstructorToFunction/replaceLinkedHashSetCall.kt");
         }
     }
 

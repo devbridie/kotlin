@@ -1,5 +1,4 @@
 // WITH_RUNTIME
-// IS_APPLICABLE: false
 
 import java.util.LinkedHashSet
 

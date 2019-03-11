@@ -16,24 +16,20 @@ class ConvertCollectionConstructorToFunction : SelfTargetingIntention<KtNameRefe
     private val functionMap = hashMapOf(
         "ArrayList" to "arrayListOf",
         "HashMap" to "hashMapOf",
-        "HashSet" to "hashSetOf"
+        "HashSet" to "hashSetOf",
+        "LinkedHashMap" to "linkedMapOf",
+        "LinkedHashSet" to "linkedSetOf"
     )
 
     override fun isApplicableTo(element: KtNameReferenceExpression, caretOffset: Int): Boolean {
-
         val name = element.text ?: return false
-
         return functionMap.containsKey(name)
     }
 
     override fun applyTo(element: KtNameReferenceExpression, editor: Editor?) {
-
         val name = element.text ?: return
-
         val functionName = functionMap[name] ?: return
-
         val arrayListOfCall = KtPsiFactory(element).createIdentifier(functionName)
-
         element.replace(arrayListOfCall)
     }
 }
