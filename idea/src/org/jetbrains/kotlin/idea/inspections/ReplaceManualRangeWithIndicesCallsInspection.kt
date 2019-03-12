@@ -21,6 +21,11 @@ import org.jetbrains.kotlin.psi.*
 
 class ReplaceManualRangeWithIndicesCallsInspection : AbstractPrimitiveRangeToInspection() {
     override fun visitRangeToExpression(expression: KtExpression, holder: ProblemsHolder) {
+
+        val constantValue = expression.getArguments()?.first?.constantValueOrNull()
+        val rightValue = (constantValue?.value as? Number)?.toInt() ?: return
+        if (rightValue != 0) return
+
         if (expression.getArguments()?.second?.deparenthesize()?.isSizeMinusOne() != true) return
 
         holder.registerProblem(
@@ -30,25 +35,12 @@ class ReplaceManualRangeWithIndicesCallsInspection : AbstractPrimitiveRangeToIns
             ReplaceManualRangeWithIndicesCallQuickFix()
         )
 
-
-
-
-        /*
-        if (expression.getArguments()?.second?.deparenthesize()?.isMinusOne() != true) return
-
-        holder.registerProblem(
-            expression,
-            "'rangeTo' or the '..' call should be replaced with 'until'",
-            ProblemHighlightType.GENERIC_ERROR_OR_WARNING,
-            ReplaceWithUntilQuickFix()
-        )*/
     }
+
     private fun KtExpression.isSizeMinusOne(): Boolean {
         if (this !is KtBinaryExpression) return false
         if (operationToken != KtTokens.MINUS) return false
 
-        //    isCalling(FqName("kotlin.collections.size"))
-        //    val leftValue = right?.
         val leftValue = left?.isSizeOrLength() ?: return false
         val constantValue = right?.constantValueOrNull()
         val rightValue = (constantValue?.value as? Number)?.toInt() ?: return false
@@ -65,7 +57,11 @@ class ReplaceManualRangeWithIndicesCallQuickFix: LocalQuickFix {
     override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
         val element = descriptor.psiElement as KtExpression
         val args = element.getArguments() ?: return
-        val first = (args.first as? KtCallExpression)?.calleeExpression ?: return
+        val second = args.second as? KtBinaryExpression ?: return
+
+//        val vv = args.second as? KtCallExpression ?: return
+//        val first = (args.first as? KtCallExpression)?.calleeExpression ?: return
+
         element.replace(
             KtPsiFactory(element).createExpressionByPattern(
                 "$0.indices",
