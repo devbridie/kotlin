@@ -2123,6 +2123,54 @@ public class LocalInspectionTestGenerated extends AbstractLocalInspectionTest {
         }
     }
 
+    @TestMetadata("idea/testData/inspectionsLocal/convertToObjectDeclaration")
+    @TestDataPath("$PROJECT_ROOT")
+    @RunWith(JUnit3RunnerWithInners.class)
+    public static class ConvertToObjectDeclaration extends AbstractLocalInspectionTest {
+        private void runTest(String testDataFilePath) throws Exception {
+            KotlinTestUtils.runTest(this::doTest, TargetBackend.ANY, testDataFilePath);
+        }
+
+        @TestMetadata("accompanyingDeclarations.kt")
+        public void testAccompanyingDeclarations() throws Exception {
+            runTest("idea/testData/inspectionsLocal/convertToObjectDeclaration/accompanyingDeclarations.kt");
+        }
+
+        @TestMetadata("accompanyingNonDeclarations.kt")
+        public void testAccompanyingNonDeclarations() throws Exception {
+            runTest("idea/testData/inspectionsLocal/convertToObjectDeclaration/accompanyingNonDeclarations.kt");
+        }
+
+        public void testAllFilesPresentInConvertToObjectDeclaration() throws Exception {
+            KotlinTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("idea/testData/inspectionsLocal/convertToObjectDeclaration"), Pattern.compile("^([\\w\\-_]+)\\.(kt|kts)$"), TargetBackend.ANY, true);
+        }
+
+        @TestMetadata("existingSuper.kt")
+        public void testExistingSuper() throws Exception {
+            runTest("idea/testData/inspectionsLocal/convertToObjectDeclaration/existingSuper.kt");
+        }
+
+        @TestMetadata("inheritance.kt")
+        public void testInheritance() throws Exception {
+            runTest("idea/testData/inspectionsLocal/convertToObjectDeclaration/inheritance.kt");
+        }
+
+        @TestMetadata("named.kt")
+        public void testNamed() throws Exception {
+            runTest("idea/testData/inspectionsLocal/convertToObjectDeclaration/named.kt");
+        }
+
+        @TestMetadata("refactorCompanionReference.kt")
+        public void testRefactorCompanionReference() throws Exception {
+            runTest("idea/testData/inspectionsLocal/convertToObjectDeclaration/refactorCompanionReference.kt");
+        }
+
+        @TestMetadata("simple.kt")
+        public void testSimple() throws Exception {
+            runTest("idea/testData/inspectionsLocal/convertToObjectDeclaration/simple.kt");
+        }
+    }
+
     @TestMetadata("idea/testData/inspectionsLocal/copyWithoutNamedArguments")
     @TestDataPath("$PROJECT_ROOT")
     @RunWith(JUnit3RunnerWithInners.class)
