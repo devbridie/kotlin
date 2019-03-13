@@ -6270,9 +6270,29 @@ public class LocalInspectionTestGenerated extends AbstractLocalInspectionTest {
             KotlinTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("idea/testData/inspectionsLocal/ReplaceManualRangeWithIndicesCallsInspection"), Pattern.compile("^([\\w\\-_]+)\\.(kt|kts)$"), TargetBackend.ANY, true);
         }
 
+        @TestMetadata("minusTwo.kt")
+        public void testMinusTwo() throws Exception {
+            runTest("idea/testData/inspectionsLocal/ReplaceManualRangeWithIndicesCallsInspection/minusTwo.kt");
+        }
+
+        @TestMetadata("notSizeRange.kt")
+        public void testNotSizeRange() throws Exception {
+            runTest("idea/testData/inspectionsLocal/ReplaceManualRangeWithIndicesCallsInspection/notSizeRange.kt");
+        }
+
         @TestMetadata("printArray.kt")
         public void testPrintArray() throws Exception {
             runTest("idea/testData/inspectionsLocal/ReplaceManualRangeWithIndicesCallsInspection/printArray.kt");
+        }
+
+        @TestMetadata("rangeTo.kt")
+        public void testRangeTo() throws Exception {
+            runTest("idea/testData/inspectionsLocal/ReplaceManualRangeWithIndicesCallsInspection/rangeTo.kt");
+        }
+
+        @TestMetadata("until.kt")
+        public void testUntil() throws Exception {
+            runTest("idea/testData/inspectionsLocal/ReplaceManualRangeWithIndicesCallsInspection/until.kt");
         }
     }
 

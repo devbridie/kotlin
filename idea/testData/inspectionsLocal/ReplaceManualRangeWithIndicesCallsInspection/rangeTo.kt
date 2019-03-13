@@ -2,7 +2,7 @@
 
 fun foo() {
     var array = arrayOf(1,2,3)
-    for  (i in 0..<caret>array.size-1) {
+    for  (i in 0.<caret>rangeTo(array.size-1)) {
 
     }
 }
