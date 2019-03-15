@@ -119,7 +119,7 @@ class ReplaceManualRangeWithIndicesCallQuickFix : LocalQuickFix {
 
 private fun KtExpression.deparenthesize() = KtPsiUtil.safeDeparenthesize(this)
 
-private val REGEX_RANGE_TO = """kotlin.(Char|Byte|Short|Int|Long).rangeTo""".toRegex()
+private val REGEX_RANGE_TO = """kotlin.(Int).rangeTo""".toRegex()
 private val REGEX_UNTIL = """kotlin.(Char|Byte|Short|Int|Long|ranges).until""".toRegex()
 
 

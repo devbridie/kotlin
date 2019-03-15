@@ -1782,7 +1782,7 @@
     />
 
     <localInspection implementationClass="org.jetbrains.kotlin.idea.inspections.ReplaceManualRangeWithIndicesCallsInspection"
-                     displayName="Convert manual ranges to Collection.Indices calls"
+                     displayName="Convert manual ranges to Collection.indices calls"
                      groupPath="Kotlin"
                      groupName="Style issues"
                      enabledByDefault="true"
