@@ -6275,6 +6275,11 @@ public class LocalInspectionTestGenerated extends AbstractLocalInspectionTest {
             runTest("idea/testData/inspectionsLocal/ReplaceManualRangeWithIndicesCallsInspection/minusTwo.kt");
         }
 
+        @TestMetadata("nonZero.kt")
+        public void testNonZero() throws Exception {
+            runTest("idea/testData/inspectionsLocal/ReplaceManualRangeWithIndicesCallsInspection/nonZero.kt");
+        }
+
         @TestMetadata("notSizeRange.kt")
         public void testNotSizeRange() throws Exception {
             runTest("idea/testData/inspectionsLocal/ReplaceManualRangeWithIndicesCallsInspection/notSizeRange.kt");

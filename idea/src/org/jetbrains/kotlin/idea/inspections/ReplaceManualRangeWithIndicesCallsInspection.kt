@@ -27,15 +27,11 @@ import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode
 
 class ReplaceManualRangeWithIndicesCallsInspection : AbstractKotlinInspection() {
 
-
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
 
         return expressionVisitor { expression ->
             if (expression !is KtBinaryExpression && expression !is KtDotQualifiedExpression) return@expressionVisitor
-
             val fqName = expression.getCallableDescriptor()?.fqNameUnsafe?.asString() ?: return@expressionVisitor
-
-            if (!fqName.matches(REGEX_RANGE_TO) && !fqName.matches(REGEX_UNTIL)) return@expressionVisitor
 
             when {
                 fqName.matches(REGEX_RANGE_TO) -> visitRangeToExpression(expression, holder)
@@ -48,15 +44,13 @@ class ReplaceManualRangeWithIndicesCallsInspection : AbstractKotlinInspection() 
 
     private fun visitRangeToExpression(expression: KtExpression, holder: ProblemsHolder) {
         if (expression.getArguments()?.second?.deparenthesize()?.isSizeMinusOne() != true) return
-
         val constantValue = expression.getArguments()?.first?.constantValueOrNull()
-        val rightValue = (constantValue?.value as? Number)?.toInt() ?: return
+        val rightValue = (constantValue?.value as? Number)?.toInt()
         if (rightValue != 0) return
-
 
         holder.registerProblem(
             expression,
-            "'rangeTo or the '..' call should be replaced with .indices call",
+            "'rangeTo call should be replaced with .indices call",
             ProblemHighlightType.GENERIC_ERROR_OR_WARNING,
             ReplaceManualRangeWithIndicesCallQuickFix()
         )
@@ -65,15 +59,13 @@ class ReplaceManualRangeWithIndicesCallsInspection : AbstractKotlinInspection() 
 
     private fun visitUntilExpression(expression: KtExpression, holder: ProblemsHolder) {
         if (expression.getArguments()?.second?.deparenthesize()?.isSizeOrLength() != true) return
-
         val constantValue = expression.getArguments()?.first?.constantValueOrNull()
-        val rightValue = (constantValue?.value as? Number)?.toInt() ?: return
+        val rightValue = (constantValue?.value as? Number)?.toInt()
         if (rightValue != 0) return
-
 
         holder.registerProblem(
             expression,
-            "'rangeTo or the '..' call should be replaced with .indices call",
+            "'until' call should be replaced with .indices call",
             ProblemHighlightType.GENERIC_ERROR_OR_WARNING,
             ReplaceManualRangeWithIndicesCallQuickFix()
         )
@@ -84,7 +76,6 @@ class ReplaceManualRangeWithIndicesCallsInspection : AbstractKotlinInspection() 
     private fun KtExpression.isSizeMinusOne(): Boolean {
         if (this !is KtBinaryExpression) return false
         if (operationToken != KtTokens.MINUS) return false
-
         val leftValue = left?.isSizeOrLength() ?: return false
         val constantValue = right?.constantValueOrNull()
         val rightValue = (constantValue?.value as? Number)?.toInt() ?: return false
@@ -101,16 +92,26 @@ class ReplaceManualRangeWithIndicesCallQuickFix : LocalQuickFix {
     override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
         val element = descriptor.psiElement as KtExpression
         val args = element.getArguments() ?: return
-        val second = (args.second as? KtBinaryExpression) ?: return
-        val array = (second.left as? KtDotQualifiedExpression)?.getLeftMostReceiverExpression() ?: return
+        if (args.second is KtBinaryExpression) {
+            val second = (args.second as? KtBinaryExpression) ?: return
+            element.replace(
+                KtPsiFactory(element).createExpressionByPattern(
+                    "$0.indices",
+                    (second.left as? KtDotQualifiedExpression)?.getLeftMostReceiverExpression() ?: return
+                )
 
-        element.replace(
-            KtPsiFactory(element).createExpressionByPattern(
-                "$0.indices",
-                array
             )
+        } else {
+            element.replace(
+                KtPsiFactory(element).createExpressionByPattern(
+                    "$0.indices",
+                    (args.second as? KtDotQualifiedExpression)?.getLeftMostReceiverExpression() ?: return
+                )
 
-        )
+            )
+        }
+
+
     }
 
 }
@@ -119,7 +120,7 @@ class ReplaceManualRangeWithIndicesCallQuickFix : LocalQuickFix {
 private fun KtExpression.deparenthesize() = KtPsiUtil.safeDeparenthesize(this)
 
 private val REGEX_RANGE_TO = """kotlin.(Char|Byte|Short|Int|Long).rangeTo""".toRegex()
-private val REGEX_UNTIL = """kotlin.(Char|Byte|Short|Int|Long).until""".toRegex()
+private val REGEX_UNTIL = """kotlin.(Char|Byte|Short|Int|Long|ranges).until""".toRegex()
 
 
 fun KtExpression.constantValueOrNull(context: BindingContext? = null): ConstantValue<Any?>? {
