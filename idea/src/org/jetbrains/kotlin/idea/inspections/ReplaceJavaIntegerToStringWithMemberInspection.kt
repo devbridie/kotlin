@@ -36,13 +36,17 @@ private class ConvertIntegerToStringQuickFix : LocalQuickFix {
     override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
         val dotQualifiedExpression = descriptor.psiElement as? KtDotQualifiedExpression ?: return
         val element = dotQualifiedExpression.selectorExpression as? KtCallExpression ?: return
-        val integerClass = dotQualifiedExpression.receiverExpression
         val arguments = element.valueArguments
         val integerArg = arguments[0]
         val radixArg = arguments.getOrNull(1)
 
-        element.replace(KtPsiFactory(element).createExpression("toString(${radixArg?.text ?: ""})"))
-        integerClass.replace(KtPsiFactory(integerClass).createExpression(integerArg.text))
+        dotQualifiedExpression.replace(
+            KtPsiFactory(element).createExpressionByPattern(
+                "$0.toString($1)",
+                integerArg.text,
+                radixArg?.text ?: ""
+            )
+        )
     }
 }
 
