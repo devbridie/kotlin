@@ -6983,6 +6983,34 @@ public class LocalInspectionTestGenerated extends AbstractLocalInspectionTest {
         }
     }
 
+    @TestMetadata("idea/testData/inspectionsLocal/replaceJavaToStringToIntToString")
+    @TestDataPath("$PROJECT_ROOT")
+    @RunWith(JUnit3RunnerWithInners.class)
+    public static class ReplaceJavaToStringToIntToString extends AbstractLocalInspectionTest {
+        private void runTest(String testDataFilePath) throws Exception {
+            KotlinTestUtils.runTest(this::doTest, TargetBackend.ANY, testDataFilePath);
+        }
+
+        public void testAllFilesPresentInReplaceJavaToStringToIntToString() throws Exception {
+            KotlinTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("idea/testData/inspectionsLocal/replaceJavaToStringToIntToString"), Pattern.compile("^([\\w\\-_]+)\\.(kt|kts)$"), TargetBackend.ANY, true);
+        }
+
+        @TestMetadata("replaceListElementToString.kt")
+        public void testReplaceListElementToString() throws Exception {
+            runTest("idea/testData/inspectionsLocal/replaceJavaToStringToIntToString/replaceListElementToString.kt");
+        }
+
+        @TestMetadata("replaceToStringBase.kt")
+        public void testReplaceToStringBase() throws Exception {
+            runTest("idea/testData/inspectionsLocal/replaceJavaToStringToIntToString/replaceToStringBase.kt");
+        }
+
+        @TestMetadata("replaceToStringWithRadix.kt")
+        public void testReplaceToStringWithRadix() throws Exception {
+            runTest("idea/testData/inspectionsLocal/replaceJavaToStringToIntToString/replaceToStringWithRadix.kt");
+        }
+    }
+
     @TestMetadata("idea/testData/inspectionsLocal/replaceNegatedIsEmptyWithIsNotEmpty")
     @TestDataPath("$PROJECT_ROOT")
     @RunWith(JUnit3RunnerWithInners.class)
