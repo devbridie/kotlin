@@ -3327,8 +3327,8 @@
                      language="kotlin"
     />
 
-    <localInspection implementationClass="org.jetbrains.kotlin.idea.inspections.ReplaceJavaToStringToIntToString"
-                     displayName="Replace 'Integer.toString(int)' to 'int.toString()'"
+    <localInspection implementationClass="org.jetbrains.kotlin.idea.inspections.ReplaceJavaIntegerToStringWithMemberInspection"
+                     displayName="Replace 'Integer.toString(int)' with 'int.toString()'"
                      groupPath="Kotlin"
                      groupName="Style issues"
                      enabledByDefault="true"
