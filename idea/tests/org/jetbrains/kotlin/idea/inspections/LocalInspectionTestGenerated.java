@@ -6995,6 +6995,11 @@ public class LocalInspectionTestGenerated extends AbstractLocalInspectionTest {
             KotlinTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("idea/testData/inspectionsLocal/replaceJavaToStringToIntToString"), Pattern.compile("^([\\w\\-_]+)\\.(kt|kts)$"), TargetBackend.ANY, true);
         }
 
+        @TestMetadata("replaceIntToString.kt")
+        public void testReplaceIntToString() throws Exception {
+            runTest("idea/testData/inspectionsLocal/replaceJavaToStringToIntToString/replaceIntToString.kt");
+        }
+
         @TestMetadata("replaceListElementToString.kt")
         public void testReplaceListElementToString() throws Exception {
             runTest("idea/testData/inspectionsLocal/replaceJavaToStringToIntToString/replaceListElementToString.kt");
