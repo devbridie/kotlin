@@ -19,13 +19,13 @@ class ConvertCollectionConstructorToFunction : SelfTargetingIntention<KtCallExpr
         "java.util.ArrayList.<init>" to "arrayListOf",
         "kotlin.collections.ArrayList.<init>" to "arrayListOf",
         "java.util.HashMap.<init>" to "hashMapOf",
-        "kotlin.collections.HashMap.<init>" to "arrayListOf",
+        "kotlin.collections.HashMap.<init>" to "hashMapOf",
         "java.util.HashSet.<init>" to "hashSetOf",
-        "kotlin.collections.HashSet.<init>" to "arrayListOf",
+        "kotlin.collections.HashSet.<init>" to "hashSetOf",
         "java.util.LinkedHashMap.<init>" to "linkedMapOf",
-        "kotlin.collections.LinkedHashMap.<init>" to "arrayListOf",
+        "kotlin.collections.LinkedHashMap.<init>" to "linkedMapOf",
         "java.util.LinkedHashSet.<init>" to "linkedSetOf",
-        "kotlin.collections.LinkedHashSet.<init>" to "arrayListOf"
+        "kotlin.collections.LinkedHashSet.<init>" to "linkedSetOf"
     )
 
     override fun isApplicableTo(element: KtCallExpression, caretOffset: Int): Boolean {
